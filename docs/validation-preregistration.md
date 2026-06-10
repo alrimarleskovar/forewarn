@@ -58,9 +58,9 @@
 ### 4.1 Sinal (Teste 1)
 | Classe | Critério (default a confirmar) | Confirmado? |
 |---|---|---|
-| **FORTE** | janela realizada mediana **≥ 2h** `E/OU` teto endereçável **≥ 40%**, **estável nos dois regimes** | `[x]` valor final: `[___]` |
-| **MÉDIO** | janela **1–2h** `OU` sinal instável entre regimes / atribuição mista | `[x]` valor final janela: `[___]` |
-| **FRACO** | janela **< 1h** `E` teto endereçável **< `[25]%`** | `[x]` valor final janela: `[___]` / teto: `[___]` |
+| **FORTE** | janela realizada mediana **≥ 2h** `E/OU` teto endereçável **≥ 40%**, **estável nos dois regimes** | `[ ]` valor final: `2h / 40%` |
+| **MÉDIO** | janela **1–2h** `OU` sinal instável entre regimes / atribuição mista | `[ ]` valor final janela: `<1h` |
+| **FRACO** | janela **< 1h** `E` teto endereçável **< `25%`** | `[ ]` valor final janela: `<1h` / teto: `25%` |
 
 **Definição de "estável entre regimes":** a classe não muda entre fev/2026 e out/2025; divergência rebaixa para MÉDIO no máximo. `[ ]` confirmado
 
