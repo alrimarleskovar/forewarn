@@ -1,22 +1,22 @@
 ---
 name: Research finding
-about: Achado de pesquisa (reconstrução, discovery, rampa)
+about: Research finding (reconstruction, discovery, ramp)
 title: ""
 labels: research
 ---
 
-## Evento analisado
+## Event analyzed
 
-<!-- ex.: fev/2026, out/2025; market/posição se aplicável -->
+<!-- e.g.: Feb/2026, Oct/2025; market/position if applicable -->
 
-## Métrica
+## Metric
 
-<!-- ex.: janela realizada point-in-time, teto endereçável, capacidade de curar -->
+<!-- e.g.: point-in-time realized window, addressable ceiling, cure capacity -->
 
-## Achado
+## Finding
 
-<!-- o resultado, com expectativa pré-registrada vs. observado quando aplicável -->
+<!-- the result, with pre-registered expectation vs. observed when applicable -->
 
-## Link para dados
+## Link to data
 
-<!-- query Dune (com hash do commit do pré-registro), tx hashes, planilha -->
+<!-- Dune query (with the pre-registration commit hash), tx hashes, spreadsheet -->

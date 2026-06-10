@@ -1,22 +1,22 @@
 ---
 name: Bug
-about: Algo está errado no repo, CI ou tooling
+about: Something is wrong in the repo, CI, or tooling
 title: ""
 labels: bug
 ---
 
-## O que aconteceu
+## What happened
 
-<!-- comportamento observado -->
+<!-- observed behavior -->
 
-## O que era esperado
+## What was expected
 
-## Como reproduzir
+## How to reproduce
 
 1. ...
 
-## Ambiente
+## Environment
 
-<!-- SO, versões (node/python/uv), link de run do CI se aplicável -->
+<!-- OS, versions (node/python/uv), link to a CI run if applicable -->
 
-> ⚠️ Vulnerabilidade de segurança? NÃO abra issue pública — ver SECURITY.md.
+> ⚠️ Security vulnerability? Do NOT open a public issue — see SECURITY.md.

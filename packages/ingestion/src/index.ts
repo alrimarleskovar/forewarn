@@ -2,13 +2,13 @@
  * SPDX-License-Identifier: MIT
  * Copyright (c) 2026 Alrimar Sobrinho
  *
- * Stub de ingestão do Morpho Risk Tooling.
+ * Ingestion stub for the Morpho Risk Tooling.
  *
- * Propósito (pós-Gate Zero): clientes finos para Dune, subgraph Morpho e
- * GraphQL oficial — Ethereum + Base. Nesta fase de validação pré-build não
- * há lógica: nenhuma query é escrita ou executada antes de o commit do
- * pré-registro (docs/validation-preregistration.md § 4 preenchido) existir
- * no remote. Ver CONTRIBUTING.md.
+ * Purpose (post-Gate Zero): thin clients for Dune, the Morpho subgraph and
+ * the official GraphQL API — Ethereum + Base. At this pre-build validation
+ * stage there is no logic: no query is written or executed before the
+ * pre-registration commit (docs/validation-preregistration.md § 4 filled in)
+ * exists on the remote. See CONTRIBUTING.md.
  */
 
 export {};

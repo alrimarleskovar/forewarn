@@ -1,30 +1,29 @@
-# Branch Protection & Settings — Checklist (manual, pós-push)
+# Branch Protection & Settings — Checklist (manual, post-push)
 
-Aplicar nas settings do repo no GitHub após o primeiro push. Tudo aqui é settings de repo — não vai em workflow.
+Apply in the repo settings on GitHub after the first push. Everything here is repo settings — it does not go in a workflow.
 
-## Branch protection em `main`
+## Branch protection on `main`
 
 `Settings → Branches → Add branch protection rule` (pattern: `main`):
 
-- [ ] **Require a pull request before merging** — com **1 approving review**.
-- [ ] **Require status checks to pass before merging**, incluindo:
-  - [ ] CI: `quant`, `ingestion` e **`preregistration-gate`**
-  - [ ] CodeQL (`javascript-typescript` e `python`)
-- [ ] **Require branches to be up to date before merging** (recomendado).
-- [ ] **Do not allow force pushes** em `main`.
-- [ ] **Do not allow deletions** (recomendado).
+- [ ] **Require a pull request before merging** — with **1 approving review**.
+- [ ] **Require status checks to pass before merging**, including:
+  - [ ] CI: `quant`, `ingestion`, and **`preregistration-gate`**
+  - [ ] CodeQL (`javascript-typescript` and `python`)
+- [ ] **Require branches to be up to date before merging** (recommended).
+- [ ] **Do not allow force pushes** on `main`.
+- [ ] **Do not allow deletions** (recommended).
 
-## Segurança automática
+## Automated security
 
 `Settings → Code security and analysis`:
 
-- [ ] **Secret scanning** habilitado.
-- [ ] **Push protection** (de secret scanning) habilitado.
-- [ ] **Dependabot alerts** habilitado.
-- [ ] **Dependabot security updates** (recomendado).
-- [ ] **CodeQL**: confirmar que o workflow `codeql.yml` aparece e roda (default setup OFF — usamos advanced via workflow).
+- [ ] **Secret scanning** enabled.
+- [ ] **Push protection** (from secret scanning) enabled.
+- [ ] **Dependabot alerts** enabled.
+- [ ] **Dependabot security updates** (recommended).
+- [ ] **CodeQL**: confirm that the `codeql.yml` workflow appears and runs (default setup OFF — we use advanced via workflow).
 
-## Depois
+## Afterwards
 
-- [ ] `gh auth login` e rodar `scripts/seed-issues.sh` (milestones + issues).
-- [ ] Conferir que o commit do pré-registro aparece na timeline **antes** de qualquer conteúdo em `dune/queries/`.
+- [ ] Verify that the pre-registration commit appears in the timeline **before** any content in `dune/queries/`.

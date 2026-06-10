@@ -1,20 +1,20 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Monitor ao vivo v1 — todos os mercados relevantes da Morpho (Ethereum + Base).
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""Live monitor v1 — all relevant Morpho markets (Ethereum + Base).
 
-Evolução do v0 (2 mercados → todos): mesma matemática de saúde, mesmo oráculo
-real por mercado, mesmos cortes de dust logados. Mercados "relevantes" =
-não-idle com borrow ≥ US$50k (corte logado no JSON).
+Evolution of v0 (2 markets → all): same health math, same real per-market
+oracle, same logged dust cutoffs. "Relevant" markets = non-idle with
+borrow ≥ US$50k (cutoff logged in the JSON).
 
-A saúde é 100% on-chain (colateral × price()/1e36 × LLTV ÷ dívida — válida
-para qualquer par). USD entra SÓ no ranking/agregado, via loanAsset.priceUsd
-da API da Morpho.
+Health is 100% on-chain (collateral × price()/1e36 × LLTV ÷ debt — valid
+for any pair). USD enters ONLY in the ranking/aggregate, via the Morpho
+API's loanAsset.priceUsd.
 
-Metadados de mercado (idToMarketParams/market/price) e position() por
-borrower são lidos em lote via Multicall3 num bloco pinado por chain;
-oráculos que revertem são pulados e contados (tryAggregate).
+Market metadata (idToMarketParams/market/price) and position() per borrower
+are read in batches via Multicall3 at a pinned block per chain; reverting
+oracles are skipped and counted (tryAggregate).
 
-Uso:
+Usage:
     uv run python -m risk_model.live_monitor_v1
 """
 
@@ -46,17 +46,18 @@ from risk_model.warning_window_v1 import ALERT_BUFFER, RESULTS
 SEL_TRY_AGGREGATE = "0xbce38bd7"  # tryAggregate(bool,(address,bytes)[])
 MARKET_MIN_BORROW_USD = 50_000.0
 
-# --- heurística de correlação colateral×dívida (aproximação, logada) ----------
-# stable-stable (sUSDe/USDtb) e mesma família LST/underlying (wstETH/WETH,
-# LBTC/WBTC) = "correlated": alavancagem intencional, baixo risco de liquidação
-# por preço. Todo o resto = "directional" (cbBTC/USDC), onde aviso importa.
+# --- collateral×debt correlation heuristic (approximation, logged) ------------
+# stable-stable (sUSDe/USDtb) and same LST/underlying family (wstETH/WETH,
+# LBTC/WBTC) = "correlated": intentional leverage, low risk of price-driven
+# liquidation. Everything else = "directional" (cbBTC/USDC), where warning
+# matters.
 STABLE_EXTRA = {"DAI", "SDAI", "FRAX", "LUSD", "GHO", "USR", "EURC", "EURE",
                 "DOLA", "BOLD", "MKUSD", "RLUSD"}
 CORRELATION_HEURISTIC = (
-    "classe de ativo por símbolo: 'USD' no símbolo ou lista de stables → stable; "
-    "'BTC' → família BTC; 'ETH' → família ETH; mesma classe (stable-stable, "
-    "eth-eth, btc-btc) = correlated, resto = directional. Aproximação — não "
-    "considera profundidade de peg nem oráculo."
+    "asset class by symbol: 'USD' in the symbol or stables list → stable; "
+    "'BTC' → BTC family; 'ETH' → ETH family; same class (stable-stable, "
+    "eth-eth, btc-btc) = correlated, rest = directional. Approximation — does "
+    "not consider peg depth or the oracle."
 )
 
 
@@ -72,28 +73,28 @@ def asset_class(symbol: str) -> str:
 
 
 def classify_market(collateral_symbol: str, loan_symbol: str) -> tuple[str, str]:
-    """('correlated'|'directional', razão) — heurística simples por símbolo."""
+    """('correlated'|'directional', reason) — simple symbol-based heuristic."""
     a, b = asset_class(collateral_symbol), asset_class(loan_symbol)
     if a == b and a in ("stable", "eth", "btc"):
         return "correlated", f"{a}-{b}"
     return "directional", f"{a}-{b}"
 
 
-# --- v1.3: checagem de peg assimétrica e na moeda do ativo ---------------------
-# Flag de depeg SÓ abaixo de ~97% do peg NATIVO (ou sem preço). Acima do par é
-# normal: wrappers yield-bearing (sUSDe, sUSDS, syrupUSDC) valem >$1 por design.
-# Stables de euro (EURC/EURe) são comparados ao EUR/USD, não a $1.
+# --- v1.3: asymmetric peg check, in the asset's own currency -------------------
+# Depeg flag ONLY below ~97% of the NATIVE peg (or no price). Above par is
+# normal: yield-bearing wrappers (sUSDe, sUSDS, syrupUSDC) are worth >$1 by
+# design. Euro stables (EURC/EURe) are compared against EUR/USD, not $1.
 DEPEG_BELOW = 0.97
 
 
 def get_peg_targets() -> dict[str, float | None]:
-    """{'USD': 1.0, 'EUR': taxa EUR/USD}. EUR=None se o FX falhar (não flagar)."""
+    """{'USD': 1.0, 'EUR': EUR/USD rate}. EUR=None if FX fails (do not flag)."""
     targets: dict[str, float | None] = {"USD": 1.0}
     try:
         resp = requests.get("https://api.frankfurter.app/latest?from=EUR&to=USD", timeout=15)
         resp.raise_for_status()
         targets["EUR"] = float(resp.json()["rates"]["USD"])
-    except Exception:  # noqa: BLE001 — sem FX, stables EUR não são julgados
+    except Exception:  # noqa: BLE001 — without FX, EUR stables are not judged
         targets["EUR"] = None
     return targets
 
@@ -104,14 +105,14 @@ def stable_currency(symbol: str) -> str:
 
 def depegged_stables(sides: list[tuple[str, float | None, str]],
                      targets: dict[str, float | None]) -> list[dict]:
-    """Stables abaixo de DEPEG_BELOW × peg nativo (ou sem preço)."""
+    """Stables below DEPEG_BELOW × native peg (or with no price)."""
     out = []
     for sym, price, side in sides:
         if asset_class(sym) != "stable":
             continue
         target = targets.get(stable_currency(sym))
         if target is None:
-            continue  # FX indisponível — não julga
+            continue  # FX unavailable — no judgment
         if price is None or price < DEPEG_BELOW * target:
             out.append({"side": side, "symbol": sym, "price_usd": price,
                         "peg_target_usd": target})
@@ -121,7 +122,7 @@ def depegged_stables(sides: list[tuple[str, float | None, str]],
 def classify_market_v2(coll_sym: str, coll_price: float | None,
                        loan_sym: str, loan_price: float | None,
                        targets: dict[str, float | None]) -> tuple[str, str, list[dict]]:
-    """('directional'|'correlated'|'anomalous', razão, depegs reais)."""
+    """('directional'|'correlated'|'anomalous', reason, real depegs)."""
     base, reason = classify_market(coll_sym, loan_sym)
     depegs = depegged_stables(
         [(coll_sym, coll_price, "collateral"), (loan_sym, loan_price, "loan")], targets
@@ -179,7 +180,7 @@ def discover_markets() -> tuple[list[dict], dict]:
                 "chain": CHAIN_NAME[it["chain"]["id"]],
                 "label": f"{coll['symbol']}/{loan['symbol']}",
                 "bucket": bucket,
-                "correlation": bucket,  # compat: dashboards antigos leem este campo
+                "correlation": bucket,  # compat: older dashboards read this field
                 "correlation_reason": corr_reason,
                 "depegged_assets": depegs,
                 "collateral_price_usd": coll_price,
@@ -196,7 +197,7 @@ def discover_markets() -> tuple[list[dict], dict]:
 
 def _multicall(chain_id: int, calls: list[tuple[str, str]], block_hex: str,
                tolerate_revert: bool = False) -> list[str | None]:
-    """Lote de eth_calls; com tolerate_revert usa tryAggregate (None nos reverts)."""
+    """Batch of eth_calls; with tolerate_revert uses tryAggregate (None on reverts)."""
     results: list[str | None] = []
     for i in range(0, len(calls), META_CHUNK):
         chunk = calls[i : i + META_CHUNK]
@@ -205,7 +206,7 @@ def _multicall(chain_id: int, calls: list[tuple[str, str]], block_hex: str,
             raw = rpc_multi(chain_id, "eth_call", [{"to": MULTICALL3, "data": data}, block_hex])
             results.extend(decode_aggregate(raw))
         else:
-            # tryAggregate(false, calls): bool + offset + mesmo array do aggregate
+            # tryAggregate(false, calls): bool + offset + same array as aggregate
             array = encode_aggregate(chunk)[10 + 64:]
             data = SEL_TRY_AGGREGATE + f"{0:064x}" + f"{0x40:064x}" + array
             raw = rpc_multi(chain_id, "eth_call", [{"to": MULTICALL3, "data": data}, block_hex])
@@ -224,7 +225,7 @@ def _multicall(chain_id: int, calls: list[tuple[str, str]], block_hex: str,
 
 
 def load_market_chain_state(markets: list[dict], blocks: dict[int, str]) -> int:
-    """Anexa oracle/lltv/tba/tbs/price36 on-chain a cada market. Retorna nº pulados."""
+    """Attaches on-chain oracle/lltv/tba/tbs/price36 to each market. Returns skip count."""
     skipped_oracle = 0
     for cid in CHAINS:
         group = [m for m in markets if m["chain_id"] == cid]
@@ -259,14 +260,14 @@ def main() -> int:
     snapshot_ts = int(time.time())
     blocks = {cid: rpc_multi(cid, "eth_blockNumber", []) for cid in CHAINS}
     print(f"Snapshot @ {datetime.fromtimestamp(snapshot_ts, tz=UTC).isoformat()} "
-          f"| blocos: { {cid: int(b, 16) for cid, b in blocks.items()} }")
+          f"| blocks: { {cid: int(b, 16) for cid, b in blocks.items()} }")
 
     markets, disc_skipped = discover_markets()
-    print(f"mercados relevantes (borrow ≥ ${MARKET_MIN_BORROW_USD:,.0f}): {len(markets)} "
-          f"| descartados na descoberta: {disc_skipped}")
+    print(f"relevant markets (borrow ≥ ${MARKET_MIN_BORROW_USD:,.0f}): {len(markets)} "
+          f"| dropped during discovery: {disc_skipped}")
     skipped_oracle = load_market_chain_state(markets, blocks)
     active_markets = [m for m in markets if m.get("price36")]
-    print(f"metadados on-chain OK: {len(active_markets)} | oráculos revertendo: {skipped_oracle}")
+    print(f"on-chain metadata OK: {len(active_markets)} | reverting oracles: {skipped_oracle}")
 
     positions, meta_markets, failed_markets = [], [], []
     covered = 0
@@ -312,19 +313,19 @@ def main() -> int:
             })
             covered = idx
             if idx % 25 == 0 or idx == len(active_markets):
-                print(f"  …{idx}/{len(active_markets)} mercados "
-                      f"({len(positions):,} posições verificadas)")
-        except Exception as exc:  # noqa: BLE001 — pula o mercado, conta e segue
+                print(f"  …{idx}/{len(active_markets)} markets "
+                      f"({len(positions):,} positions verified)")
+        except Exception as exc:  # noqa: BLE001 — skip the market, count, move on
             consecutive_failures += 1
             failed_markets.append({"label": m["label"], "chain": m["chain"], "error": str(exc)})
-            print(f"  FALHA em {m['label']} ({m['chain']}): {exc} — pulando")
+            print(f"  FAILURE on {m['label']} ({m['chain']}): {exc} — skipping")
             if consecutive_failures >= 5:
-                print(f"\nABORTADO: 5 falhas consecutivas (API/RPC fora?). "
-                      f"Cobertura: {covered}/{len(active_markets)} mercados.")
+                print(f"\nABORTED: 5 consecutive failures (API/RPC down?). "
+                      f"Coverage: {covered}/{len(active_markets)} markets.")
                 raise
 
     if failed_markets:
-        print(f"mercados pulados por falha: {len(failed_markets)}")
+        print(f"markets skipped due to failure: {len(failed_markets)}")
 
     positions.sort(key=lambda p: p["health"])
     at_risk = [p for p in positions if p["at_risk"]]
@@ -332,12 +333,12 @@ def main() -> int:
         "snapshot_ts": snapshot_ts,
         "snapshot_iso": datetime.fromtimestamp(snapshot_ts, tz=UTC).isoformat(),
         "alert_buffer": ALERT_BUFFER,
-        "rule": "em risco se saúde on-chain < 1.10 (mesma regra do backtest)",
+        "rule": "at risk if on-chain health < 1.10 (same rule as the backtest)",
         "n_markets": len(meta_markets),
         "chains": [CHAIN_NAME[c] for c in CHAINS],
         "correlation_heuristic": CORRELATION_HEURISTIC,
-        "depeg_rule": f"flag só abaixo de {DEPEG_BELOW} × peg nativo (EUR via FX); "
-                      "acima do par = normal (wrapper yield-bearing)",
+        "depeg_rule": f"flag only below {DEPEG_BELOW} × native peg (EUR via FX); "
+                      "above par = normal (yield-bearing wrapper)",
         "usd_valuation_flags": [
             {"label": m["label"], "chain": m["chain"], "depegged": m["depegged_assets"]}
             for m in meta_markets if any(
@@ -358,10 +359,10 @@ def main() -> int:
     }
     (RESULTS / "at_risk_snapshot.json").write_text(json.dumps(out, ensure_ascii=False))
 
-    print("\n================ SNAPSHOT AO VIVO v1 ================")
-    print(f"mercados: {len(meta_markets)} | posições verificadas: {len(positions):,} | "
-          f"EM RISCO (<{ALERT_BUFFER}): {len(at_risk):,} | "
-          f"dívida em risco: ${sum(p['debt_usd'] for p in at_risk):,.0f}")
+    print("\n================ LIVE SNAPSHOT v1 ================")
+    print(f"markets: {len(meta_markets)} | positions verified: {len(positions):,} | "
+          f"AT RISK (<{ALERT_BUFFER}): {len(at_risk):,} | "
+          f"debt at risk: ${sum(p['debt_usd'] for p in at_risk):,.0f}")
     print(f"JSON: {RESULTS / 'at_risk_snapshot.json'}")
     return 0
 

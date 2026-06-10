@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Refresh de um comando: monitor v1 (todos os mercados) → dashboard → site/index.html.
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""One-command refresh: monitor v1 (all markets) → dashboard → site/index.html.
 
-Uso:
+Usage:
     uv run python -m risk_model.refresh
 """
 

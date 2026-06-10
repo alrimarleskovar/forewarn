@@ -1,32 +1,34 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Medição v1 da janela de aviso de liquidação — walk-forward, SEM look-ahead.
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""v1 measurement of the liquidation warning window — walk-forward, NO look-ahead.
 
-Pipeline: liquidações via API GraphQL oficial da Morpho (Ethereum + Base,
-25/jan–10/fev/2026) → amostra de ~40 (alocação por chain proporcional ao
-volume USD; dentro da chain, maiores por repaidAssetsUsd, dedupe por
-posição) → série de preço HORÁRIA do colateral via CoinGecko → walk-forward
-hora a hora.
+Pipeline: liquidations via the official Morpho GraphQL API (Ethereum + Base,
+Jan 25–Feb 10, 2026) → sample of ~40 (per-chain allocation proportional to
+USD volume; within each chain, largest by repaidAssetsUsd, deduped by
+position) → HOURLY collateral price series via CoinGecko → hour-by-hour
+walk-forward.
 
-Regra de alerta (avaliada só com estado conhecido até t — INVIOLÁVEL):
-    alerta na primeira hora t em que
-        colateral_units × preço(t) × LLTV < dívida_usd × 1.10
-    janela = hora_da_liquidação − hora_do_alerta.
+Alert rule (evaluated only with state known up to t — INVIOLABLE):
+    alert at the first hour t where
+        collateral_units × price(t) × LLTV < debt_usd × 1.10
+    window = liquidation_hour − alert_hour.
 
-Aproximações da v1 (documentadas):
-- Tamanho da posição ≈ seizedAssets / repaidAssets do PRÓPRIO evento de
-  liquidação. Liquidações parciais subestimam a posição; o viés é
-  conservador e simétrico entre numerador (colateral) e denominador (dívida).
-- Dívida em USD tratada como CONSTANTE = repaidAssetsUsd no momento da
-  liquidação (loans da amostra são majoritariamente stablecoins; para loan
-  volátil isto é proxy).
-- Preço do colateral: série horária da CoinGecko em USD — PROXY do oráculo
-  real do market (cada market Morpho tem oráculo próprio).
-- Scan começa 48h antes da liquidação → janelas são CENSURADAS em 48h
-  (posição já abaixo do limiar em t0 reporta 48h).
-- Sem cruzamento até a liquidação → janela = 0 (nenhum aviso teria saído).
+v1 approximations (documented):
+- Position size ≈ seizedAssets / repaidAssets from the liquidation event
+  ITSELF. Partial liquidations underestimate the position; the bias is
+  conservative and symmetric between numerator (collateral) and
+  denominator (debt).
+- Debt in USD treated as CONSTANT = repaidAssetsUsd at the time of the
+  liquidation (loans in the sample are mostly stablecoins; for a volatile
+  loan this is a proxy).
+- Collateral price: hourly CoinGecko series in USD — a PROXY for the
+  market's real oracle (each Morpho market has its own oracle).
+- Scan starts 48h before the liquidation → windows are CENSORED at 48h
+  (a position already below the threshold at t0 reports 48h).
+- No crossing before the liquidation → window = 0 (no warning would have
+  gone out).
 
-Uso:
+Usage:
     uv run python -m risk_model.warning_window_v1
 """
 
@@ -47,7 +49,7 @@ CG_PLATFORM = {1: "ethereum", 8453: "base"}
 CHAIN_NAME = {1: "ethereum", 8453: "base"}
 
 T_START = int(datetime(2026, 1, 25, tzinfo=UTC).timestamp())
-T_END = int(datetime(2026, 2, 11, tzinfo=UTC).timestamp())  # exclusivo
+T_END = int(datetime(2026, 2, 11, tzinfo=UTC).timestamp())  # exclusive
 SAMPLE_SIZE = 40
 LOOKBACK_HOURS = 48
 ALERT_BUFFER = 1.10
@@ -133,8 +135,8 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 
 def pick_sample(rows: list[dict], n: int = SAMPLE_SIZE) -> list[dict]:
-    """Aloca n por chain proporcional ao volume USD repago; dentro da chain,
-    maiores por repaid_usd, no máximo 1 evento por (market, borrower)."""
+    """Allocates n per chain proportional to repaid USD volume; within each
+    chain, largest by repaid_usd, at most 1 event per (market, borrower)."""
     usable = [r for r in rows if r["repaid_usd"] and r["seized_usd"]]
     vol = {c: sum(r["repaid_usd"] for r in usable if r["chain"] == c) for c in ("ethereum", "base")}
     total = sum(vol.values())
@@ -163,9 +165,9 @@ def pick_sample(rows: list[dict], n: int = SAMPLE_SIZE) -> list[dict]:
 
 
 def fetch_hourly_prices(chain_id: int, address: str, t_from: int, t_to: int) -> list[tuple]:
-    """Série horária [(ts_segundos, preço_usd)] via CoinGecko, com cache em disco.
+    """Hourly series [(ts_seconds, price_usd)] via CoinGecko, with on-disk cache.
 
-    Levanta RuntimeError com mensagem clara em caso de bloqueio (429/401/404)."""
+    Raises RuntimeError with a clear message when blocked (429/401/404)."""
     PRICE_CACHE.mkdir(parents=True, exist_ok=True)
     cache = PRICE_CACHE / f"{chain_id}_{address.lower()}_{t_from}_{t_to}.json"
     if cache.exists():
@@ -179,25 +181,25 @@ def fetch_hourly_prices(chain_id: int, address: str, t_from: int, t_to: int) -> 
         resp = requests.get(url, timeout=60)
         if resp.status_code == 429:
             wait = 20 * (attempt + 1)
-            print(f"  CoinGecko 429; aguardando {wait}s…", file=sys.stderr)
+            print(f"  CoinGecko 429; waiting {wait}s…", file=sys.stderr)
             time.sleep(wait)
             continue
         if resp.status_code == 404:
-            raise LookupError(f"CoinGecko sem série para {address} em {CG_PLATFORM[chain_id]}")
+            raise LookupError(f"CoinGecko has no series for {address} on {CG_PLATFORM[chain_id]}")
         if resp.status_code in (401, 403):
-            raise RuntimeError(f"CoinGecko bloqueou ({resp.status_code}): {resp.text[:200]}")
+            raise RuntimeError(f"CoinGecko blocked us ({resp.status_code}): {resp.text[:200]}")
         resp.raise_for_status()
         prices = [(int(ts // 1000), float(p)) for ts, p in resp.json().get("prices", [])]
         if not prices:
-            raise LookupError(f"CoinGecko retornou série vazia para {address}")
+            raise LookupError(f"CoinGecko returned an empty series for {address}")
         cache.write_text(json.dumps(prices))
-        time.sleep(2.5)  # cortesia com o rate limit público
+        time.sleep(2.5)  # courtesy toward the public rate limit
         return prices
-    raise RuntimeError("CoinGecko: rate limit persistente (429) após 6 tentativas")
+    raise RuntimeError("CoinGecko: persistent rate limit (429) after 6 attempts")
 
 
 def price_at_or_before(series: list[tuple], t: int) -> float | None:
-    """Último preço com timestamp ≤ t. NUNCA olha à frente de t."""
+    """Last price with timestamp ≤ t. NEVER looks ahead of t."""
     candidate = None
     for ts, p in series:
         if ts <= t:
@@ -218,7 +220,7 @@ def walk_forward(row: dict, series: list[tuple]) -> dict:
     for t in range(t0, liq_ts + 1, 3600):
         p = price_at_or_before(series, t)
         if p is None:
-            continue  # sem preço conhecido até t — não decide nada
+            continue  # no price known up to t — decides nothing
         if units * p * lltv < debt_usd * ALERT_BUFFER:
             alert_ts = t
             break
@@ -237,19 +239,19 @@ def walk_forward(row: dict, series: list[tuple]) -> dict:
 
 
 def main() -> int:
-    print("1/4 Buscando liquidações na API da Morpho…")
+    print("1/4 Fetching liquidations from the Morpho API…")
     rows = fetch_all_liquidations()
     full_csv = RESULTS / "liquidations_morpho_api_2026-01-25_2026-02-10.csv"
     write_csv(full_csv, rows)
     by_chain = {c: sum(1 for r in rows if r["chain"] == c) for c in ("ethereum", "base")}
-    print(f"   {len(rows)} liquidações ({by_chain}); CSV completo: {full_csv}")
+    print(f"   {len(rows)} liquidations ({by_chain}); full CSV: {full_csv}")
 
-    print("2/4 Amostrando…")
+    print("2/4 Sampling…")
     sample = pick_sample(rows)
-    print(f"   amostra: {len(sample)} "
+    print(f"   sample: {len(sample)} "
           f"({ {c: sum(1 for r in sample if r['chain'] == c) for c in ('ethereum', 'base')} })")
 
-    print("3/4 Preços horários (CoinGecko)…")
+    print("3/4 Hourly prices (CoinGecko)…")
     tokens = sorted({(r["chain_id"], r["collateral_address"].lower()) for r in sample})
     t_from = min(r["timestamp"] for r in sample) - (LOOKBACK_HOURS + 2) * 3600
     t_to = max(r["timestamp"] for r in sample) + 3600
@@ -263,7 +265,7 @@ def main() -> int:
             print(f"   ok: {sym} ({CHAIN_NAME[chain_id]})")
         except LookupError as exc:
             dropped.append(f"{sym} ({CHAIN_NAME[chain_id]}): {exc}")
-            print(f"   SEM SÉRIE: {sym} ({CHAIN_NAME[chain_id]}) — posições descartadas")
+            print(f"   NO SERIES: {sym} ({CHAIN_NAME[chain_id]}) — positions dropped")
 
     print("4/4 Walk-forward…")
     results = []
@@ -281,18 +283,18 @@ def main() -> int:
     ge2 = sum(1 for w in windows if w >= 2)
     no_alert = sum(1 for x in results if x["no_alert"])
     censored = sum(1 for x in results if x["censored_48h"])
-    print("\n================ RESULTADO v1 ================")
-    print(f"posições analisadas: {n} (descartadas sem série de preço: {len(sample) - n})")
+    print("\n================ RESULT v1 ================")
+    print(f"positions analyzed: {n} (dropped for missing price series: {len(sample) - n})")
     if dropped:
-        print("  tokens sem série: " + "; ".join(dropped))
-    print(f"janela mediana: {statistics.median(windows):.1f} h")
-    print(f"mín/Q1/Q2/Q3/máx: {windows[0]:.1f} / {q[0]:.1f} / {q[1]:.1f} / "
+        print("  tokens without a series: " + "; ".join(dropped))
+    print(f"median window: {statistics.median(windows):.1f} h")
+    print(f"min/Q1/Q2/Q3/max: {windows[0]:.1f} / {q[0]:.1f} / {q[1]:.1f} / "
           f"{q[2]:.1f} / {windows[-1]:.1f} h")
-    print(f"fração com janela ≥ 2h: {ge2}/{n} = {100 * ge2 / n:.0f}%")
-    print(f"sem alerta antes da liquidação (janela=0): {no_alert} | censuradas em 48h: {censored}")
+    print(f"fraction with window ≥ 2h: {ge2}/{n} = {100 * ge2 / n:.0f}%")
+    print(f"no alert before the liquidation (window=0): {no_alert} | censored at 48h: {censored}")
     print(f"CSV: {out_csv}")
     if math.isnan(q[0]):
-        print("AVISO: n < 4, quartis não calculados")
+        print("WARNING: n < 4, quartiles not computed")
     return 0
 
 

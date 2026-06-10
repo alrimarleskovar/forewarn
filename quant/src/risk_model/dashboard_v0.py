@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Dashboard público v0 — HTML estático gerado de results/at_risk_snapshot.json.
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""Public dashboard v0 — static HTML generated from results/at_risk_snapshot.json.
 
-Página única, sem JS externo nem backend: manchete (dívida na zona de aviso),
-métricas por mercado, top-15 posições críticas com link pro explorer,
-distribuição de saúde e rodapé de método/ressalvas.
+Single page, no external JS or backend: headline (debt inside the warning
+zone), per-market metrics, top-15 critical positions with explorer links,
+health distribution and a method/caveats footer.
 
-Uso:
+Usage:
     uv run python -m risk_model.dashboard_v0
 """
 
@@ -17,7 +17,7 @@ from datetime import UTC, datetime
 from risk_model.live_monitor_v1 import classify_market
 from risk_model.warning_window_v1 import REPO_ROOT, RESULTS
 
-# Preencher após publicar a pesquisa. Vazio = link omitido.
+# Fill in after publishing the research. Empty = link omitted.
 METHODOLOGY_URL = ""
 CODE_URL = "https://github.com/alrimarleskovar/forewarn"
 
@@ -41,7 +41,7 @@ def render(snapshot: dict) -> str:
         for chain, block in sorted({(m["chain"], m["block"]) for m in snapshot["markets"]})
     )
 
-    # bucket: usa o carimbo do snapshot (v1.2, com peg-check); fallback 2-way por label
+    # bucket: uses the snapshot's stamp (v1.2, with peg-check); 2-way fallback by label
     corr_by_market: dict[str, str] = {}
     for m in snapshot["markets"]:
         c = m.get("bucket") or m.get("correlation")
@@ -323,11 +323,11 @@ def main() -> int:
     }
     risk = [p for p in snapshot["positions"] if p["at_risk"]]
     print(f"dashboard: {out}")
-    for bucket, tag in [("directional", "DIRECIONAL (manchete)"),
-                        ("correlated", "correlacionado saudável"),
-                        ("anomalous", "anômalo/depeg")]:
+    for bucket, tag in [("directional", "DIRECTIONAL (headline)"),
+                        ("correlated", "healthy correlated"),
+                        ("anomalous", "anomalous/depeg")]:
         sel = [p for p in risk if corr[p["market_id"]] == bucket]
-        print(f"  {tag}: {len(sel):,} posições | {fmt_usd(sum(p['debt_usd'] for p in sel))}")
+        print(f"  {tag}: {len(sel):,} positions | {fmt_usd(sum(p['debt_usd'] for p in sel))}")
     return 0
 
 

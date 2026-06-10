@@ -23,7 +23,7 @@ jobs:
       - name: Lint (ruff)
         run: uv run ruff check .
       - name: Test (pytest)
-        # exit code 5 = nenhum teste coletado; aceitável na fase de scaffold
+        # exit code 5 = no tests collected; acceptable during the scaffold phase
         run: |
           set +e
           uv run pytest
@@ -51,13 +51,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Bloquear queries antes do pré-registro (§ 4 preenchido)
+      - name: Block queries before pre-registration (§ 4 filled)
         run: |
           set -euo pipefail
           PREREG="docs/validation-preregistration.md"
 
-          # Recorta APENAS a seção "## 4." (limiares) — campos de nome/data/
-          # assinatura fora dela podem estar em branco sem bloquear.
+          # Extract ONLY the "## 4." section (thresholds) — name/date/signature
+          # fields outside it may be blank without blocking.
           section4="$(awk '/^## 4\./{flag=1; next} /^## /{flag=0} flag' "$PREREG")"
 
           thresholds_blank=false
@@ -71,8 +71,8 @@ jobs:
           fi
 
           if $thresholds_blank && $queries_present; then
-            echo "::error::Pré-registro violado: docs/validation-preregistration.md § 4 ainda contém [___], mas existe dune/queries/*.sql com conteúdo."
-            echo "Preencha e commite os limiares ANTES de qualquer query (ver CONTRIBUTING.md)."
+            echo "::error::Pre-registration violated: docs/validation-preregistration.md § 4 still contains [___], but a non-empty dune/queries/*.sql exists."
+            echo "Fill in and commit the thresholds BEFORE any query (see CONTRIBUTING.md)."
             exit 1
           fi
 

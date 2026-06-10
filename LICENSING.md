@@ -1,25 +1,25 @@
 # LICENSING
 
-Este é um monorepo de **licença mista**. A licença que governa cada arquivo é a do seu diretório, conforme a tabela abaixo — não o rótulo único que o GitHub exibir.
+This is a **mixed-license** monorepo. The license governing each file is that of its directory, per the table below — not whatever single label GitHub displays.
 
-| Diretório | Licença | Arquivo |
+| Directory | License | File |
 |---|---|---|
 | `packages/ingestion/` | **MIT** | `LICENSE-MIT` |
 | `dune/` | **MIT** | `LICENSE-MIT` |
 | `quant/` | **BUSL-1.1** (Change License: Apache-2.0) | `LICENSE-BSL` |
-| Demais arquivos (docs, configs, raiz) | **MIT** | `LICENSE-MIT` |
+| All other files (docs, configs, root) | **MIT** | `LICENSE-MIT` |
 
-## Racional do split
+## Rationale for the split
 
-- **Infra-commodity** (ingestão, queries Dune, helpers) → **MIT**: maximiza adoção e auditabilidade; não é onde está a defensibilidade.
-- **Modelo de risco** (`quant/`) → **BUSL-1.1** (source-available): código aberto para leitura e avaliação, mas com restrição de uso em produção até a Change Date, quando converte para **Apache-2.0**. Precedente direto: o core do Morpho Blue é BUSL-1.1.
+- **Commodity infrastructure** (ingestion, Dune queries, helpers) → **MIT**: maximizes adoption and auditability; this is not where the defensibility lies.
+- **Risk model** (`quant/`) → **BUSL-1.1** (source-available): code open for reading and evaluation, but with a restriction on production use until the Change Date, when it converts to **Apache-2.0**. Direct precedent: the Morpho Blue core is BUSL-1.1.
 
-Parâmetros do BUSL (Licensor, Change Date etc.) estão em `LICENSE-BSL`. O Additional Use Grant permite uso limitado a **pesquisa não-produtiva e avaliação interna**.
+The BUSL parameters (Licensor, Change Date, etc.) are in `LICENSE-BSL`. The Additional Use Grant permits use limited to **non-production research and internal evaluation**.
 
-## Nota sobre o rótulo do GitHub
+## Note on the GitHub label
 
-O GitHub detecta licença por heurística e pode rotular este repo de forma imprecisa (ex.: exibir só "MIT" ou "licença não detectada") por ser monorepo de licença mista. **Quem governa são os arquivos de licença por diretório e esta tabela**, não o rótulo da interface.
+GitHub detects licenses heuristically and may label this repo imprecisely (e.g., showing only "MIT" or "license not detected") because it is a mixed-license monorepo. **The per-directory license files and this table govern**, not the UI label.
 
 ## Headers
 
-Arquivos-fonte de `quant/` levam header BUSL-1.1; arquivos-fonte de `packages/ingestion/` levam header MIT.
+Source files in `quant/` carry a BUSL-1.1 header; source files in `packages/ingestion/` carry an MIT header.

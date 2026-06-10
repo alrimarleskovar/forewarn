@@ -1,24 +1,24 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Atribuição v1 — capacidade de curar no bloco do alerta (ponto-no-tempo).
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""Attribution v1 — capacity to cure at the alert block (point-in-time).
 
-Para cada posição de results/warning_windows_v1.csv, no bloco correspondente
-à hora do alerta (NUNCA depois):
-- gas:    saldo nativo (ETH) da wallet > ~US$2;
-- fundos: saldo na wallet de colateral + loan token + stablecoins, em USD;
-- capacidade = gas E fundos ≥ 10% da dívida (dívida ≈ repaid_usd, proxy v1).
+For each position in results/warning_windows_v1.csv, at the block
+corresponding to the alert hour (NEVER later):
+- gas:   wallet's native (ETH) balance > ~US$2;
+- funds: wallet balance of collateral + loan token + stablecoins, in USD;
+- capacity = gas AND funds ≥ 10% of the debt (debt ≈ repaid_usd, v1 proxy).
 
-Fontes: RPC arquival público (publicnode; arquival verificado contra o
-contrato de depósito da Beacon Chain), bloco via DeFiLlama (ajustado para
-timestamp ≤ alerta), preços via cache CoinGecko de warning_window_v1.
+Sources: public archival RPC (publicnode; archival verified against the
+Beacon Chain deposit contract), block via DeFiLlama (adjusted to
+timestamp ≤ alert), prices via the CoinGecko cache from warning_window_v1.
 
-Limitações documentadas:
-- Wallets que são smart contracts (flag is_contract) podem pagar gas via
-  paymaster (smart wallets na Base) — o proxy de gas SUBESTIMA capacidade.
-- Fundos em outras wallets do mesmo dono não são observáveis → teto é
-  conservador (subestimado) também por isso.
+Documented limitations:
+- Wallets that are smart contracts (is_contract flag) may pay gas via a
+  paymaster (smart wallets on Base) — the gas proxy UNDERESTIMATES capacity.
+- Funds in other wallets of the same owner are not observable → the ceiling
+  is conservative (underestimated) for this reason too.
 
-Uso:
+Usage:
     uv run python -m risk_model.attribution_v1
 """
 
@@ -72,14 +72,14 @@ def rpc_call(chain_id: int, method: str, params: list, retries: int = 5):
                 raise RuntimeError(payload["error"])
             time.sleep(0.12)
             return payload["result"]
-        except Exception as exc:  # noqa: BLE001 — retry amplo com backoff
+        except Exception as exc:  # noqa: BLE001 — broad retry with backoff
             if attempt == retries - 1:
-                raise RuntimeError(f"RPC {RPC[chain_id]} {method} falhou: {exc}") from exc
+                raise RuntimeError(f"RPC {RPC[chain_id]} {method} failed: {exc}") from exc
             time.sleep(3 * (attempt + 1))
 
 
 def block_at_or_before(chain_id: int, ts: int) -> int:
-    """Bloco com timestamp ≤ ts: DeFiLlama dá o palpite, RPC ajusta para trás."""
+    """Block with timestamp ≤ ts: DeFiLlama gives the guess, RPC adjusts backward."""
     resp = requests.get(f"https://coins.llama.fi/block/{LLAMA_CHAIN[chain_id]}/{ts}", timeout=30)
     resp.raise_for_status()
     height = resp.json()["height"]
@@ -99,13 +99,13 @@ def erc20_balance(chain_id: int, token: str, holder: str, block: int) -> int:
 def load_eth_price_series() -> list[tuple]:
     if ETH_PRICE_CACHE.exists():
         return [tuple(p) for p in json.loads(ETH_PRICE_CACHE.read_text())]
-    raise RuntimeError("série de preço do ETH ausente — rode a etapa de preparação")
+    raise RuntimeError("ETH price series missing — run the preparation step")
 
 
 def collateral_series(chain_id: int, address: str) -> list[tuple]:
     matches = sorted(PRICE_CACHE.glob(f"{chain_id}_{address.lower()}_*.json"))
     if not matches:
-        raise RuntimeError(f"cache de preço ausente para {address} (chain {chain_id})")
+        raise RuntimeError(f"price cache missing for {address} (chain {chain_id})")
     return [tuple(p) for p in json.loads(matches[0].read_text())]
 
 
@@ -136,7 +136,7 @@ def main() -> int:
 
         is_contract = rpc_call(chain_id, "eth_getCode", [borrower, hex(block)]) not in ("0x", None)
 
-        # tokens curáveis: colateral do market + loan token + stables (dedupe por endereço)
+        # curable tokens: market collateral + loan token + stables (deduped by address)
         coll_addr = ext["collateral_address"]
         coll_dec = int(ext["collateral_decimals"])
         tokens = {coll_addr.lower(): ("collateral", coll_addr, coll_dec)}
@@ -152,7 +152,7 @@ def main() -> int:
             if label == "collateral":
                 price = price_at_or_before(collateral_series(chain_id, addr), alert_ts) or 0.0
             else:
-                price = 1.0  # stablecoins (inclui o loan USDC)
+                price = 1.0  # stablecoins (including the USDC loan)
             curable_usd += units * price
 
         had_capacity = had_gas and curable_usd >= CURE_FRACTION * debt_usd
@@ -173,9 +173,9 @@ def main() -> int:
                 "had_capacity": had_capacity,
             }
         )
-        print(f"  {i}/{n} {w['chain']} {borrower[:10]}… bloco {block} "
-              f"gas={'S' if had_gas else 'N'} curável=${curable_usd:,.0f} "
-              f"dívida=${debt_usd:,.0f} capacidade={'SIM' if had_capacity else 'NÃO'}")
+        print(f"  {i}/{n} {w['chain']} {borrower[:10]}… block {block} "
+              f"gas={'Y' if had_gas else 'N'} curable=${curable_usd:,.0f} "
+              f"debt=${debt_usd:,.0f} capacity={'YES' if had_capacity else 'NO'}")
 
     out_csv = RESULTS / "attribution_v1.csv"
     with out_csv.open("w", newline="") as fh:
@@ -186,17 +186,17 @@ def main() -> int:
     cap = [r for r in out if r["had_capacity"]]
     no_gas = sum(1 for r in out if not r["had_gas"])
     contracts = sum(1 for r in out if r["is_contract"])
-    print("\n================ ATRIBUIÇÃO v1 ================")
-    print(f"posições: {len(out)}")
-    print(f"COM capacidade de curar (teto endereçável): {len(cap)}/{len(out)} "
+    print("\n================ ATTRIBUTION v1 ================")
+    print(f"positions: {len(out)}")
+    print(f"WITH capacity to cure (addressable ceiling): {len(cap)}/{len(out)} "
           f"= {100 * len(cap) / len(out):.0f}%")
-    print(f"SEM capacidade: {len(out) - len(cap)}/{len(out)} "
+    print(f"WITHOUT capacity: {len(out) - len(cap)}/{len(out)} "
           f"= {100 * (len(out) - len(cap)) / len(out):.0f}%")
-    print(f"  - sem gas (nativo ≤ ${GAS_MIN_USD:.0f}): {no_gas}")
-    print(f"  - wallets contrato (gas via paymaster possível — proxy subestima): {contracts}")
+    print(f"  - no gas (native ≤ ${GAS_MIN_USD:.0f}): {no_gas}")
+    print(f"  - contract wallets (gas via paymaster possible — proxy underestimates): {contracts}")
     if cap:
         med = statistics.median(r["curable_usd"] / r["debt_usd"] for r in cap)
-        print(f"mediana de curável/dívida entre os COM capacidade: {100 * med:.0f}%")
+        print(f"median curable/debt among those WITH capacity: {100 * med:.0f}%")
     print(f"CSV: {out_csv}")
     return 0
 

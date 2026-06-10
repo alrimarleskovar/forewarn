@@ -1,33 +1,33 @@
 # Security Policy
 
-## Como reportar
+## How to report
 
-Reporte vulnerabilidades **em privado**:
+Report vulnerabilities **privately**:
 
-- Preferencial: GitHub Security Advisory privado — `https://github.com/alrimarleskovar/forewarn/security/advisories/new`
-- Alternativa: e-mail `alrimar6@gmail.com`
+- Preferred: private GitHub Security Advisory — `https://github.com/alrimarleskovar/forewarn/security/advisories/new`
+- Alternative: e-mail `alrimar6@gmail.com`
 
-**Não** abra issue pública para falhas de segurança. Responderemos em até 7 dias.
+Do **not** open a public issue for security flaws. We will respond within 7 days.
 
-## Escopo e postura
+## Scope and posture
 
-Este projeto é **analytics read-only**:
+This project is **read-only analytics**:
 
-- **Sem custódia** de fundos. **Sem smart contracts** próprios. **Sem execução de transações.**
-- Não há código de produto em produção nesta fase (validação pré-build).
+- **No custody** of funds. **No smart contracts** of our own. **No transaction execution.**
+- There is no product code in production at this stage (pre-build validation).
 
-A superfície de risco real é:
+The actual risk surface is:
 
-1. **Dependências** (npm em `packages/ingestion/`, pip/uv em `quant/`, GitHub Actions) — monitoradas por Dependabot e CodeQL.
-2. **Vazamento de segredos** — chaves de RPC/Dune e arquivos `.env` (nunca commitados; ver `.gitignore`; secret scanning + push protection habilitados nas settings do repo).
-3. **Supply-chain** — pacotes comprometidos, actions não-pinadas.
+1. **Dependencies** (npm in `packages/ingestion/`, pip/uv in `quant/`, GitHub Actions) — monitored by Dependabot and CodeQL.
+2. **Secret leakage** — RPC/Dune keys and `.env` files (never committed; see `.gitignore`; secret scanning + push protection enabled in the repo settings).
+3. **Supply chain** — compromised packages, unpinned actions.
 
-## Auditoria
+## Auditing
 
-Auditoria real (modelo de risco e qualquer contrato/código de produto) é **pós-GO** — não existe código de produto para auditar nesta fase. O Dia 1 cobre postura + scanning automático (CodeQL, Dependabot, secret scanning), não auditoria de código.
+A real audit (of the risk model and any product contract/code) comes **after the validation verdict** — there is no product code to audit at this stage. Day 1 covers posture + automated scanning (CodeQL, Dependabot, secret scanning), not a code audit.
 
 ## Supported versions
 
-| Versão | Suportada |
+| Version | Supported |
 |---|---|
 | `main` | ✅ |

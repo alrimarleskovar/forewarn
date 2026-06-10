@@ -1,14 +1,14 @@
 # risk-model (quant)
 
-Módulo quant do Morpho Risk Tooling.
+Quant module of the Morpho Risk Tooling.
 
-**Licença: BUSL-1.1** (Change License: Apache-2.0) — ver `LICENSE-BSL` na raiz e `LICENSING.md`. Uso adicional permitido: pesquisa não-produtiva e avaliação interna.
+**License: BUSL-1.1** (Change License: Apache-2.0) — see `LICENSE-BSL` at the repo root and `LICENSING.md`. Additional use permitted: non-production research and internal evaluation.
 
-Nesta fase (validação pré-build) o módulo contém **apenas o schema base** (`src/risk_model/schema.py`) — tipos pydantic, sem lógica. O modelo estrutural (Black-Cox/Merton, point-in-time) **não** é implementado antes do veredito GO.
+At this stage (pre-build validation) the module contains **only the base schema** (`src/risk_model/schema.py`) — pydantic types, no logic. The structural model (Black-Cox/Merton, point-in-time) is **not** implemented before a GO verdict.
 
 ## Dev
 
-Python pinado em `3.11.7` (`.python-version`); gerenciado com [uv](https://docs.astral.sh/uv/) — `uv.lock` commitado.
+Python pinned at `3.11.7` (`.python-version`); managed with [uv](https://docs.astral.sh/uv/) — `uv.lock` is committed.
 
 ```bash
 uv sync

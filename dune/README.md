@@ -1,11 +1,11 @@
 # dune/
 
-Queries Dune do projeto (licença **MIT**).
+The project's Dune queries (**MIT** license).
 
-## ⚠️ Esta pasta está vazia de propósito
+## ⚠️ This folder is intentionally empty
 
-**Nenhum arquivo `.sql` aqui pode ganhar conteúdo até o commit do `docs/validation-preregistration.md` — com a tabela de limiares (§ 4) preenchida — estar commitado e pushado no remote** (GUARDRAIL 4 / Gate Zero; ver `CONTRIBUTING.md`).
+**No `.sql` file here may receive content until the commit of `docs/validation-preregistration.md` — with the thresholds table (§ 4) filled in — has been committed and pushed to the remote** (GUARDRAIL 4 / Gate Zero; see `CONTRIBUTING.md`).
 
-O job `preregistration-gate` no CI falha se houver `.sql` não-vazio aqui enquanto o § 4 do pré-registro contiver `[___]`.
+The `preregistration-gate` job in CI fails if there is a non-empty `.sql` file here while § 4 of the pre-registration still contains `[___]`.
 
-Quando liberadas, toda query deve referenciar no cabeçalho o **hash do commit do pré-registro**.
+Once unblocked, every query must reference the **hash of the pre-registration commit** in its header.

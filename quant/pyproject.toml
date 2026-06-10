@@ -1,7 +1,7 @@
 [project]
 name = "risk-model"
 version = "0.0.1"
-description = "Morpho Risk Tooling — Quant Module (schema base; sem modelo nesta fase)"
+description = "Morpho Risk Tooling — Quant Module (base schema; no model at this stage)"
 readme = "README.md"
 requires-python = "~=3.11.0"
 license = { text = "BUSL-1.1" }

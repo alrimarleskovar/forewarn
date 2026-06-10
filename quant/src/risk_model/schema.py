@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Esquema base; o modelo (Black-Cox/Merton, point-in-time) NÃO é implementado nesta fase.
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""Base schema; the model (Black-Cox/Merton, point-in-time) is NOT implemented in this phase.
 
-Apenas estrutura (tipos pydantic), sem lógica. Chains do MVP: Ethereum + Base.
+Structure only (pydantic types), no logic. MVP chains: Ethereum + Base.
 """
 
 from datetime import datetime
@@ -12,14 +12,14 @@ from pydantic import BaseModel
 
 
 class Chain(StrEnum):
-    """Chains no escopo do MVP."""
+    """Chains in scope for the MVP."""
 
     ETHEREUM = "ethereum"
     BASE = "base"
 
 
 class Market(BaseModel):
-    """Um market Morpho (permissionless: cada market define oráculo/IRM próprios)."""
+    """A Morpho market (permissionless: each market defines its own oracle/IRM)."""
 
     market_id: str
     collateral_asset: str
@@ -31,7 +31,7 @@ class Market(BaseModel):
 
 
 class OraclePriceObservation(BaseModel):
-    """Preço do oráculo de um market em um bloco histórico."""
+    """Oracle price of a market at a historical block."""
 
     market_id: str
     block: int
@@ -40,7 +40,7 @@ class OraclePriceObservation(BaseModel):
 
 
 class Position(BaseModel):
-    """Posição de um borrower em um market."""
+    """A borrower's position in a market."""
 
     market_id: str
     borrower: str
@@ -49,7 +49,7 @@ class Position(BaseModel):
 
 
 class HealthSnapshot(BaseModel):
-    """Saúde de uma posição em um instante (reconstrução walk-forward)."""
+    """Health of a position at an instant (walk-forward reconstruction)."""
 
     position: Position
     timestamp: datetime
@@ -58,7 +58,7 @@ class HealthSnapshot(BaseModel):
 
 
 class LiquidationEvent(BaseModel):
-    """Liquidação executada on-chain."""
+    """Liquidation executed on-chain."""
 
     position: Position
     timestamp: datetime
@@ -69,11 +69,12 @@ class LiquidationEvent(BaseModel):
 
 
 class WarningSignal(BaseModel):
-    """Sinal de aviso reconstruído para uma posição liquidada.
+    """Warning signal reconstructed for a liquidated position.
 
     capacity_to_cure = had_sufficient_gas AND had_recoverable_collateral
-    (observável on-chain). Consciência/vontade NÃO é observável on-chain —
-    vem do dado de alert-delivery do integrador (Teste 2) e não entra aqui.
+    (observable on-chain). Awareness/willingness is NOT observable on-chain —
+    it comes from the integrator's alert-delivery data (Test 2) and is not
+    included here.
     """
 
     position: Position

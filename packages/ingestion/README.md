@@ -1,10 +1,10 @@
 # @morpho-risk-tooling/ingestion
 
-Esqueleto TypeScript de ingestão de dados (Dune, subgraph Morpho, GraphQL oficial) para Ethereum + Base.
+TypeScript skeleton for data ingestion (Dune, Morpho subgraph, official GraphQL) covering Ethereum + Base.
 
-**Licença: MIT** (ver `LICENSE-MIT` na raiz e `LICENSING.md` para o split do monorepo).
+**License: MIT** (see `LICENSE-MIT` at the repo root and `LICENSING.md` for the monorepo split).
 
-Nesta fase (validação pré-build) é apenas um stub — sem indexer próprio, sem lógica. Conteúdo real só após o pré-registro estar commitado e, para qualquer dado de liquidação, após o Gate Zero (ver `CONTRIBUTING.md`).
+At this stage (pre-build validation) this is just a stub — no indexer of our own, no logic. Real content only after the pre-registration is committed and, for any liquidation data, after Gate Zero (see `CONTRIBUTING.md`).
 
 ```bash
 npm install

@@ -1,23 +1,23 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""Monitor ao vivo v0 — snapshot único de posições em risco (sem serviço/alerta).
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""Live monitor v0 — single snapshot of at-risk positions (no service/alerting).
 
-Mercados v0: Base cbBTC/USDC e Ethereum wstETH/USDC (os do evento de fev/2026).
+v0 markets: Base cbBTC/USDC and Ethereum wstETH/USDC (those of the Feb 2026 event).
 
-Fluxo: enumera borrowers ativos via API GraphQL da Morpho → lê estado ATUAL
-on-chain num bloco pinado por chain (position() por borrower; market() e
-idToMarketParams()/oracle.price() uma vez por mercado) → saúde e distância ao
-limiar com a MESMA regra do backtest (buffer ALERT_BUFFER reusado).
+Flow: enumerates active borrowers via the Morpho GraphQL API → reads CURRENT
+on-chain state at a pinned block per chain (position() per borrower; market()
+and idToMarketParams()/oracle.price() once per market) → health and distance
+to the threshold using the SAME rule as the backtest (ALERT_BUFFER reused).
 
-saúde = colateral_raw × preço_oráculo / 1e36 × LLTV / dívida_raw
-(preço do oráculo Morpho já vem na escala 1e36 ajustada por decimais;
-dívida = borrowShares→assets com shares/assets virtuais, como no backtest)
+health = raw_collateral × oracle_price / 1e36 × LLTV / raw_debt
+(the Morpho oracle price already comes at 1e36 scale adjusted for decimals;
+debt = borrowShares→assets with virtual shares/assets, as in the backtest)
 
-Cortes EXPLÍCITOS de enumeração (logados, não silenciosos):
-- posições com dívida < US$1.000 ficam fora do ranking, EXCETO se a API as
-  reportar com healthFactor ≤ 1.3 e dívida ≥ US$100 (varredura extra).
+EXPLICIT enumeration cutoffs (logged, not silent):
+- positions with debt < US$1,000 are left out of the ranking, EXCEPT when the
+  API reports them with healthFactor ≤ 1.3 and debt ≥ US$100 (extra sweep).
 
-Uso:
+Usage:
     uv run python -m risk_model.live_monitor_v0
 """
 
@@ -33,7 +33,7 @@ from risk_model.demo_prep_v1_1 import MORPHO, SEL_MARKET, SEL_POSITION
 from risk_model.warning_window_v1 import ALERT_BUFFER, RESULTS
 
 MORPHO_API = "https://blue-api.morpho.org/graphql"
-SEL_ID_TO_PARAMS = "0x2c3c9157"  # idToMarketParams(bytes32) — keccak verificado
+SEL_ID_TO_PARAMS = "0x2c3c9157"  # idToMarketParams(bytes32) — keccak verified
 SEL_ORACLE_PRICE = "0xa035b1fe"  # price()
 
 MIN_DEBT_USD = 1_000.0
@@ -93,15 +93,15 @@ def gql(query: str, variables: dict, retries: int = 6) -> dict:
                 requests.exceptions.RetryError) as exc:
             last = exc
             time.sleep(min(5 * 2**attempt, 120))  # backoff: 5s → 120s
-    raise RuntimeError(f"Morpho API indisponível após {retries} tentativas: {last}")
+    raise RuntimeError(f"Morpho API unavailable after {retries} attempts: {last}")
 
 
 def enumerate_borrowers(mkt: dict) -> tuple[dict[str, dict], dict]:
-    """{borrower: {api_health, api_debt_usd}} + métricas do corte (p/ log)."""
+    """{borrower: {api_health, api_debt_usd}} + cutoff metrics (for logging)."""
     out: dict[str, dict] = {}
     stats = {"enumerated": 0, "below_min_debt": 0, "sweep_added": 0, "total_active": 0}
 
-    # passada principal: maiores dívidas primeiro, para até dívida < MIN_DEBT_USD
+    # main pass: largest debts first, stops once debt < MIN_DEBT_USD
     skip = 0
     stop = False
     while not stop:
@@ -125,7 +125,7 @@ def enumerate_borrowers(mkt: dict) -> tuple[dict[str, dict], dict]:
             }
         skip += 1000
 
-    # varredura extra: pequenos mas já perto do limiar segundo a API
+    # extra sweep: small ones already close to the threshold per the API
     skip = 0
     while True:
         data = gql(POSITIONS_QUERY, {
@@ -170,7 +170,7 @@ def onchain_market(chain_id: int, market_id: str, block_hex: str) -> dict:
     }
 
 
-MULTICALL3 = "0xcA11bde05977b3631167028862bE2a173976CA11"  # mesmo endereço nas duas chains
+MULTICALL3 = "0xcA11bde05977b3631167028862bE2a173976CA11"  # same address on both chains
 SEL_AGGREGATE = "0x252dba42"  # aggregate((address,bytes)[])
 BATCH = 300
 
@@ -181,7 +181,7 @@ RPC_POOL = {
 
 
 def rpc_multi(chain_id: int, method: str, params: list, retries: int = 8):
-    """eth_* com rotação de provedores — 403/429 num provedor não derruba o run."""
+    """eth_* with provider rotation — a 403/429 on one provider doesn't kill the run."""
     last = None
     for attempt in range(retries):
         url = RPC_POOL[chain_id][attempt % len(RPC_POOL[chain_id])]
@@ -195,14 +195,14 @@ def rpc_multi(chain_id: int, method: str, params: list, retries: int = 8):
             if "error" in payload:
                 raise RuntimeError(payload["error"])
             return payload["result"]
-        except Exception as exc:  # noqa: BLE001 — rotação ampla com backoff
+        except Exception as exc:  # noqa: BLE001 — broad rotation with backoff
             last = exc
             time.sleep(2 * (attempt + 1))
-    raise RuntimeError(f"todos os RPCs falharam ({method}): {last}")
+    raise RuntimeError(f"all RPCs failed ({method}): {last}")
 
 
 def encode_aggregate(calls: list[tuple[str, str]]) -> str:
-    """ABI-encode de aggregate(Call[]); calls = [(target, calldata_sem_0x)]."""
+    """ABI-encodes aggregate(Call[]); calls = [(target, calldata_without_0x)]."""
     n = len(calls)
     tails = []
     for target, data in calls:
@@ -223,7 +223,7 @@ def encode_aggregate(calls: list[tuple[str, str]]) -> str:
 
 
 def decode_aggregate(result_hex: str) -> list[str]:
-    """Decodifica (uint256, bytes[]) → lista de returndata hex (sem 0x)."""
+    """Decodes (uint256, bytes[]) → list of hex returndata (without 0x)."""
     h = result_hex[2:] if result_hex.startswith("0x") else result_hex
     arr_off = int(h[64:128], 16) * 2
     n = int(h[arr_off : arr_off + 64], 16)
@@ -239,7 +239,7 @@ def decode_aggregate(result_hex: str) -> list[str]:
 
 def batch_positions(chain_id: int, market_id: str, borrowers: list[str], block_hex: str,
                     m: dict) -> dict[str, tuple[int, int]]:
-    """{borrower: (colateral_raw, dívida_raw)} via Multicall3, em lotes de BATCH."""
+    """{borrower: (raw_collateral, raw_debt)} via Multicall3, in batches of BATCH."""
     result: dict[str, tuple[int, int]] = {}
     for i in range(0, len(borrowers), BATCH):
         chunk = borrowers[i : i + BATCH]
@@ -263,7 +263,7 @@ def main() -> int:
     snapshot_ts = int(time.time())
     blocks = {m["chain_id"]: rpc_multi(m["chain_id"], "eth_blockNumber", []) for m in MARKETS}
     print(f"Snapshot @ {datetime.fromtimestamp(snapshot_ts, tz=UTC).isoformat()} "
-          f"| blocos pinados: { {cid: int(b, 16) for cid, b in blocks.items()} }")
+          f"| pinned blocks: { {cid: int(b, 16) for cid, b in blocks.items()} }")
 
     positions = []
     meta_markets = []
@@ -275,20 +275,20 @@ def main() -> int:
             mkt["collateral_decimals"] - mkt["loan_decimals"]
         )
         print(f"\n[{mkt['label']} @ {mkt['chain']}] LLTV={m['lltv']:.2f} "
-              f"preço oráculo implícito ≈ ${implied_price:,.0f}")
+              f"implied oracle price ≈ ${implied_price:,.0f}")
 
         borrowers, stats = enumerate_borrowers(mkt)
-        print(f"  ativos: {stats['total_active']} | candidatos (dívida ≥ ${MIN_DEBT_USD:,.0f}): "
-              f"{len(borrowers) - stats['sweep_added']} | varredura HF≤{SWEEP_HEALTH_LTE} "
+        print(f"  active: {stats['total_active']} | candidates (debt ≥ ${MIN_DEBT_USD:,.0f}): "
+              f"{len(borrowers) - stats['sweep_added']} | sweep HF≤{SWEEP_HEALTH_LTE} "
               f"(≥ ${SWEEP_MIN_DEBT_USD:,.0f}): +{stats['sweep_added']} | "
-              f"fora do corte: {stats['total_active'] - len(borrowers)}")
+              f"below the cutoff: {stats['total_active'] - len(borrowers)}")
         meta_markets.append({**mkt, "lltv": m["lltv"], "oracle": m["oracle"],
                              "block": int(block_hex, 16), "active_positions": stats["total_active"],
                              "verified_onchain": len(borrowers)})
 
         addr_list = list(borrowers)
-        print(f"  verificando {len(addr_list)} posições on-chain via Multicall3 "
-              f"({(len(addr_list) + BATCH - 1) // BATCH} lotes)…")
+        print(f"  verifying {len(addr_list)} positions on-chain via Multicall3 "
+              f"({(len(addr_list) + BATCH - 1) // BATCH} batches)…")
         states = batch_positions(cid, mid, addr_list, block_hex, m)
         for addr, (coll_raw, debt_raw) in states.items():
             if debt_raw == 0 or coll_raw == 0:
@@ -310,7 +310,7 @@ def main() -> int:
         "snapshot_ts": snapshot_ts,
         "snapshot_iso": datetime.fromtimestamp(snapshot_ts, tz=UTC).isoformat(),
         "alert_buffer": ALERT_BUFFER,
-        "rule": "em risco se saúde on-chain < 1.10 (mesma regra do backtest)",
+        "rule": "at risk if on-chain health < 1.10 (same rule as the backtest)",
         "enumeration_cutoffs": {
             "min_debt_usd": MIN_DEBT_USD,
             "sweep_health_lte": SWEEP_HEALTH_LTE,
@@ -322,14 +322,14 @@ def main() -> int:
     out_path = RESULTS / "at_risk_snapshot.json"
     Path(out_path).write_text(json.dumps(out, indent=2, ensure_ascii=False))
 
-    print("\n================ SNAPSHOT AO VIVO v0 ================")
-    print(f"posições verificadas on-chain: {len(positions)} | EM RISCO (<{ALERT_BUFFER}): "
+    print("\n================ LIVE SNAPSHOT v0 ================")
+    print(f"positions verified on-chain: {len(positions)} | AT RISK (<{ALERT_BUFFER}): "
           f"{len(at_risk)}")
     for p in at_risk[:15]:
         print(f"  {p['health']:.4f} ({p['distance_to_threshold_pct']:+.1f}%) "
               f"${p['debt_usd']:>12,.0f} {p['market']} {p['chain']} {p['borrower']}")
     if len(at_risk) > 15:
-        print(f"  … e mais {len(at_risk) - 15} (no JSON)")
+        print(f"  … and {len(at_risk) - 15} more (in the JSON)")
     print(f"JSON: {out_path}")
     return 0
 

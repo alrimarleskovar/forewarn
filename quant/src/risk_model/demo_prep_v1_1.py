@@ -1,22 +1,24 @@
 # SPDX-License-Identifier: BUSL-1.1
-# Licensed Work: Morpho Risk Tooling — Quant Module. Ver LICENSE-BSL na raiz.
-"""v1.1 da janela de aviso + preparação de dados do demo (último uso do backtest).
+# Licensed Work: Morpho Risk Tooling — Quant Module. See LICENSE-BSL at the repo root.
+"""v1.1 of the warning window + demo data preparation (last use of the backtest).
 
-Mudanças vs. v1:
-- lookback de 168h (vs. 48h) — para des-censurar a mediana;
-- tamanho REAL da posição: ``position(marketId, borrower)`` e ``market(id)``
-  lidos do contrato Morpho Blue no bloco imediatamente ANTERIOR à liquidação
-  (RPC arquival). Dívida = borrowShares→assets (com shares/assets virtuais).
-  Aproximação remanescente: tamanho tratado como constante no lookback.
+Changes vs. v1:
+- 168h lookback (vs. 48h) — to un-censor the median;
+- REAL position size: ``position(marketId, borrower)`` and ``market(id)``
+  read from the Morpho Blue contract at the block immediately BEFORE the
+  liquidation (archival RPC). Debt = borrowShares→assets (with virtual
+  shares/assets). Remaining approximation: size treated as constant over
+  the lookback.
 
-Demo: 4 posições representativas → série horária de saúde nas ~72h antes da
-liquidação, com hora do alerta (1º cruzamento de saúde < 1.10, walk-forward,
-sem look-ahead) e hora da liquidação → results/demo_trajectories.json.
+Demo: 4 representative positions → hourly health series over the ~72h before
+the liquidation, with the alert hour (1st crossing of health < 1.10,
+walk-forward, no look-ahead) and the liquidation hour →
+results/demo_trajectories.json.
 
-Selectors verificados por keccak local (o 4byte.directory retornou seletores
-errados para estas assinaturas — não confiar nele sem verificação).
+Selectors verified via local keccak (4byte.directory returned wrong
+selectors for these signatures — do not trust it without verification).
 
-Uso:
+Usage:
     uv run python -m risk_model.demo_prep_v1_1
 """
 
@@ -35,7 +37,7 @@ from risk_model.warning_window_v1 import (
     price_at_or_before,
 )
 
-MORPHO = "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"  # singleton (Ethereum e Base)
+MORPHO = "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"  # singleton (Ethereum and Base)
 SEL_POSITION = "0x93c52062"  # position(bytes32,address)
 SEL_MARKET = "0x5c60e39a"  # market(bytes32)
 LOOKBACK_H = 168
@@ -44,17 +46,17 @@ RETAIL_DEBT_RANGE = (5_000.0, 150_000.0)
 
 
 def tx_block(chain_id: int, tx_hash: str) -> int:
-    # backends do balanceador às vezes respondem null para tx antigas — retry
+    # load-balancer backends sometimes return null for old txs — retry
     for attempt in range(6):
         tx = rpc_call(chain_id, "eth_getTransactionByHash", [tx_hash])
         if tx and tx.get("blockNumber"):
             return int(tx["blockNumber"], 16)
         time.sleep(2 * (attempt + 1))
-    raise RuntimeError(f"tx não encontrada via RPC após retries: {tx_hash}")
+    raise RuntimeError(f"tx not found via RPC after retries: {tx_hash}")
 
 
 def real_position(chain_id: int, market_id: str, borrower: str, block: int) -> tuple[int, int]:
-    """(colateral_raw, dívida_raw em unidades do loan token) no bloco dado."""
+    """(raw collateral, raw debt in loan token units) at the given block."""
     data = SEL_POSITION + market_id[2:] + borrower[2:].lower().rjust(64, "0")
     res = rpc_call(chain_id, "eth_call", [{"to": MORPHO, "data": data}, hex(block)])[2:]
     borrow_shares, collateral = int(res[64:128], 16), int(res[128:192], 16)
@@ -68,7 +70,7 @@ def real_position(chain_id: int, market_id: str, borrower: str, block: int) -> t
 
 def first_alert(units: float, debt_usd: float, lltv: float, series: list,
                 liq_ts: int, lookback_h: int) -> int | None:
-    """Walk-forward: 1ª hora t com units×preço(t)×LLTV < dívida×1.10. Sem look-ahead."""
+    """Walk-forward: 1st hour t with units×price(t)×LLTV < debt×1.10. No look-ahead."""
     t0 = (liq_ts // 3600) * 3600 - lookback_h * 3600
     for t in range(t0, liq_ts + 1, 3600):
         p = price_at_or_before(series, t)
@@ -89,10 +91,11 @@ def load_inputs() -> tuple[list[dict], dict[str, dict]]:
 
 
 def position_record(ext_row: dict) -> dict | None:
-    """Lê tamanho real no bloco pré-liquidação; None se posição zerada/ilegível.
+    """Reads the real size at the pre-liquidation block; None if the position is
+    zeroed/unreadable.
 
-    O bloco da liquidação vem do timestamp (block_at_or_before) — o
-    eth_getTransactionByHash dos RPCs públicos não tem txindex confiável."""
+    The liquidation block comes from the timestamp (block_at_or_before) —
+    eth_getTransactionByHash on public RPCs has no reliable txindex."""
     chain_id = int(ext_row["chain_id"])
     blk = block_at_or_before(chain_id, int(ext_row["timestamp"]))
     coll_raw, debt_raw = real_position(
@@ -100,7 +103,7 @@ def position_record(ext_row: dict) -> dict | None:
     )
     if coll_raw == 0 or debt_raw == 0:
         return None
-    assert ext_row["loan_symbol"] == "USDC", f"loan não-USDC: {ext_row['loan_symbol']}"
+    assert ext_row["loan_symbol"] == "USDC", f"non-USDC loan: {ext_row['loan_symbol']}"
     return {
         "chain_id": chain_id,
         "liq_block": blk,
@@ -112,7 +115,7 @@ def position_record(ext_row: dict) -> dict | None:
 def main() -> int:
     windows, extraction = load_inputs()
 
-    # séries de preço com range largo o bastante para 168h de lookback
+    # price series with a range wide enough for a 168h lookback
     all_liq = [int(w["timestamp"]) for w in windows]
     t_from = min(all_liq) - (LOOKBACK_H + 2) * 3600
     t_to = max(all_liq) + 3600
@@ -123,13 +126,13 @@ def main() -> int:
         if key not in series:
             series[key] = fetch_hourly_prices(key[0], key[1], t_from, t_to)
 
-    print(f"v1.1: lookback {LOOKBACK_H}h, tamanho real — {len(windows)} posições")
+    print(f"v1.1: lookback {LOOKBACK_H}h, real size — {len(windows)} positions")
     rows_v11 = []
     for i, w in enumerate(windows, 1):
         e = extraction[w["tx_hash"]]
         pos = position_record(e)
         if pos is None:
-            print(f"  {i}: posição ilegível em {w['tx_hash'][:12]}… — pulada")
+            print(f"  {i}: unreadable position at {w['tx_hash'][:12]}… — skipped")
             continue
         liq_ts = int(w["timestamp"])
         key = (pos["chain_id"], e["collateral_address"].lower())
@@ -159,19 +162,19 @@ def main() -> int:
     ge2 = sum(1 for x in ws if x >= 2)
     cens = sum(1 for r in rows_v11 if r["censored_168h"])
     noal = sum(1 for r in rows_v11 if r["no_alert"])
-    print("\n========== JANELA v1.1 (168h, tamanho real) ==========")
-    print(f"posições: {n} | mediana: {statistics.median(ws):.1f} h")
-    print(f"mín/Q1/Q2/Q3/máx: {ws[0]:.1f} / {q[0]:.1f} / {q[1]:.1f} / {q[2]:.1f} / {ws[-1]:.1f} h")
+    print("\n========== WINDOW v1.1 (168h, real size) ==========")
+    print(f"positions: {n} | median: {statistics.median(ws):.1f} h")
+    print(f"min/Q1/Q2/Q3/max: {ws[0]:.1f} / {q[0]:.1f} / {q[1]:.1f} / {q[2]:.1f} / {ws[-1]:.1f} h")
     print(f"≥ 2h: {ge2}/{n} = {100 * ge2 / n:.0f}% | "
-          f"censuradas em 168h: {cens} | sem alerta: {noal}")
+          f"censored at 168h: {cens} | no alert: {noal}")
     print(f"CSV: {out_csv}")
 
-    # ---------------- demo: 4 trajetórias ----------------
-    print("\nSelecionando 4 posições para o demo…")
+    # ---------------- demo: 4 trajectories ----------------
+    print("\nSelecting 4 positions for the demo…")
     attribution = {r["tx_hash"]: r for r in csv.DictReader((RESULTS / "attribution_v1.csv").open())}
 
     demo_rows: list[tuple[str, dict]] = []
-    # 2 varejo EOA na Base (fora da amostra grande): cbBTC/USDC, dívida 5k–150k
+    # 2 retail EOAs on Base (outside the big sample): cbBTC/USDC, debt 5k–150k
     full = list(csv.DictReader(
         (RESULTS / "liquidations_morpho_api_2026-01-25_2026-02-10.csv").open()
     ))
@@ -192,26 +195,26 @@ def main() -> int:
         seen.add(r["borrower"])
         code = rpc_call(8453, "eth_getCode", [r["borrower"], "latest"])
         if code not in ("0x", None):
-            continue  # contrato — queremos EOA/varejo
-        demo_rows.append(("varejo EOA (Base)", r))
+            continue  # contract — we want EOA/retail
+        demo_rows.append(("retail EOA (Base)", r))
         found += 1
 
-    # 1 institucional contrato na Base + 1 Ethereum (wstETH) da amostra
+    # 1 institutional contract on Base + 1 Ethereum (wstETH) from the sample
     base_inst = next(w for w in windows
                      if w["chain"] == "base"
                      and attribution[w["tx_hash"]]["is_contract"] == "True")
     eth_pick = next(w for w in windows
                     if w["chain"] == "ethereum"
                     and extraction[w["tx_hash"]]["collateral_symbol"] == "wstETH")
-    demo_rows.append(("institucional contrato (Base)", extraction[base_inst["tx_hash"]]))
-    demo_rows.append(("institucional (Ethereum, wstETH)", extraction[eth_pick["tx_hash"]]))
+    demo_rows.append(("institutional contract (Base)", extraction[base_inst["tx_hash"]]))
+    demo_rows.append(("institutional (Ethereum, wstETH)", extraction[eth_pick["tx_hash"]]))
 
     trajectories = []
     for label, e in demo_rows:
         chain_id = int(e["chain_id"])
         pos = position_record(e)
         if pos is None:
-            print(f"  AVISO: posição do demo ilegível ({label}) — pulada")
+            print(f"  WARNING: demo position unreadable ({label}) — skipped")
             continue
         liq_ts = int(e["timestamp"])
         key = (chain_id, e["collateral_address"].lower())
@@ -250,21 +253,21 @@ def main() -> int:
             "liquidation_ts": liq_ts,
             "liquidation_iso": datetime.fromtimestamp(liq_ts, tz=UTC).isoformat(),
             "window_hours": round(window_h, 2),
-            "alert_rule": "primeira hora com saúde < 1.10 (buffer 10%), walk-forward",
+            "alert_rule": "first hour with health < 1.10 (10% buffer), walk-forward",
             "approximations": [
-                "tamanho real lido no bloco pré-liquidação, constante no lookback",
-                "preço CoinGecko horário como proxy do oráculo",
-                "dívida USDC tratada como US$ 1:1",
+                "real size read at the pre-liquidation block, constant over the lookback",
+                "hourly CoinGecko price as a proxy for the oracle",
+                "USDC debt treated as US$ 1:1",
             ],
             "series": pts,
         })
 
     out_json = RESULTS / "demo_trajectories.json"
     out_json.write_text(json.dumps(trajectories, indent=2, ensure_ascii=False))
-    print(f"\n========== DEMO ({len(trajectories)} trajetórias) ==========")
+    print(f"\n========== DEMO ({len(trajectories)} trajectories) ==========")
     for t in trajectories:
         print(f"  [{t['label']}] {t['collateral_symbol']}/{t['loan_symbol']} "
-              f"dívida=${t['real_debt_usd']:,.0f} janela={t['window_hours']:.1f}h "
+              f"debt=${t['real_debt_usd']:,.0f} window={t['window_hours']:.1f}h "
               f"({t['chain']}, {t['borrower'][:10]}…)")
     print(f"JSON: {out_json}")
     return 0

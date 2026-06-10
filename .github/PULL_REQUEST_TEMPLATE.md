@@ -1,11 +1,11 @@
-## O que muda
+## What changes
 
-<!-- descrição curta -->
+<!-- short description -->
 
 ## Checklist
 
-- [ ] Lint e testes passam localmente (`quant/`: `uv run ruff check . && uv run pytest`; `packages/ingestion/`: `npm run lint && npm test`).
-- [ ] Docs atualizadas, se o comportamento ou o processo mudou.
-- [ ] **Pre-registration gate:** se este PR toca `dune/queries/*.sql`, confirmo que
-      `docs/validation-preregistration.md` § 4 não contém `[___]`.
-      (O CI `preregistration-gate` falha de qualquer forma — esta é a checagem manual prévia.)
+- [ ] Lint and tests pass locally (`quant/`: `uv run ruff check . && uv run pytest`; `packages/ingestion/`: `npm run lint && npm test`).
+- [ ] Docs updated, if behavior or process changed.
+- [ ] **Pre-registration gate:** if this PR touches `dune/queries/*.sql`, I confirm that
+      `docs/validation-preregistration.md` § 4 does not contain `[___]`.
+      (The `preregistration-gate` CI fails anyway — this is the prior manual check.)

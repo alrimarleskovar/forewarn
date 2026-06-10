@@ -1,18 +1,18 @@
 ---
 name: Task
-about: Tarefa de trabalho (validação, scaffold, pesquisa operacional)
+about: Work task (validation, scaffold, operational research)
 title: ""
 labels: task
 ---
 
-## Objetivo
+## Goal
 
-<!-- o que precisa existir/acontecer ao fechar esta issue -->
+<!-- what needs to exist/happen when this issue is closed -->
 
-## Contexto
+## Context
 
-<!-- por quê; link para milestone/plano (docs/validation-plan-v2.md § ...) -->
+<!-- why; link to the relevant milestone or doc -->
 
-## Critério de pronto
+## Definition of done
 
 - [ ] ...

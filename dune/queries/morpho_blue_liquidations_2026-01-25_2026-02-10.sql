@@ -1,13 +1,13 @@
--- Morpho Blue — eventos Liquidate, Ethereum + Base
--- Janela: 2026-01-25 00:00 UTC (inclusive) → 2026-02-11 00:00 UTC (exclusivo),
---         i.e. 25/jan a 10/fev/2026 completos.
+-- Morpho Blue — Liquidate events, Ethereum + Base
+-- Window: 2026-01-25 00:00 UTC (inclusive) → 2026-02-11 00:00 UTC (exclusive),
+--         i.e. Jan 25 through Feb 10, 2026, in full.
 --
--- Pré-registro (docs/validation-preregistration.md), commitado ANTES desta query:
+-- Pre-registration (docs/validation-preregistration.md), committed BEFORE this query:
 --   f5bcfd1e9dd11b80e07344043f9b07b795b3e4ee  chore(validation): commit pre-registered thresholds
 --   b9b9d9cada9bb79dbffbee4cdfb3ba9507d8d2a0  chore(validation): preencher valores finais do §4
 --
--- Escopo: extração bruta apenas — sem modelo, sem cálculo de janela de aviso.
--- Tabelas decodificadas confirmadas na spellbook oficial da Dune
+-- Scope: raw extraction only — no model, no warning-window computation.
+-- Decoded tables confirmed in Dune's official spellbook
 -- (sources/_sector/lending/borrow/{ethereum,base}/_sources.yml).
 
 SELECT
