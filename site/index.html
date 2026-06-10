@@ -64,210 +64,486 @@
 <body>
 <div class="wrap">
   <div class="kicker">Morpho Blue · Liquidation Early-Warning · Live Snapshot v0</div>
-  <h1><span class="hl">$69.02M</span> of debt is inside the 10% warning
-      buffer across <span class="hl">1,016</span> positions</h1>
-  <div class="sub">Snapshot Jun 10, 2026 11:51 UTC · base block 47,151,461 · ethereum block 25,286,862 · health read on-chain from each
-      market's own oracle · warning rule: health &lt; 1.10</div>
+  <h1><span class="hl">$170.55M</span> of directional debt is inside the
+      10% warning buffer across <span class="hl">1,176</span> positions</h1>
+  <div class="sub">Snapshot Jun 10, 2026 18:33 UTC · 245 markets on Ethereum + Base · base block 47,163,539 · ethereum block 25,288,863 ·
+      health read on-chain from each market's own oracle · warning rule:
+      health &lt; 1.10 · plus $562.92M in healthy correlated pairs and
+      $10.61M in depegged/anomalous markets (both shown separately
+      below)</div>
 
-  <h2>Markets monitored</h2>
+  <h2>Directional markets — top 10 by debt at risk</h2>
   <table>
     <tr><th>Market</th><th class="num">Active</th><th class="num">Verified on-chain</th>
         <th class="num">At risk</th><th class="num">Debt at risk</th></tr>
     
         <tr>
           <td><strong>cbBTC/USDC</strong> <span class="chip">base</span></td>
-          <td class="num">29,765</td>
-          <td class="num">17,364</td>
-          <td class="num warn">1,014</td>
-          <td class="num warn">$68.99M</td>
+          <td class="num">29,805</td>
+          <td class="num">17,332</td>
+          <td class="num warn">699</td>
+          <td class="num warn">$50.68M</td>
         </tr>
         <tr>
-          <td><strong>wstETH/USDC</strong> <span class="chip">ethereum</span></td>
-          <td class="num">368</td>
-          <td class="num">205</td>
+          <td><strong>PRIME/PYUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="num">48</td>
+          <td class="num">42</td>
+          <td class="num warn">29</td>
+          <td class="num warn">$43.27M</td>
+        </tr>
+        <tr>
+          <td><strong>muBOND/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">2</td>
+          <td class="num">2</td>
           <td class="num warn">2</td>
-          <td class="num warn">$33,035</td>
+          <td class="num warn">$11.52M</td>
+        </tr>
+        <tr>
+          <td><strong>wstUSR/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">33</td>
+          <td class="num">21</td>
+          <td class="num warn">21</td>
+          <td class="num warn">$10.02M</td>
+        </tr>
+        <tr>
+          <td><strong>PRIME/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">2</td>
+          <td class="num">1</td>
+          <td class="num warn">1</td>
+          <td class="num warn">$8.48M</td>
+        </tr>
+        <tr>
+          <td><strong>wstETH/USDT</strong> <span class="chip">ethereum</span></td>
+          <td class="num">184</td>
+          <td class="num">114</td>
+          <td class="num warn">1</td>
+          <td class="num warn">$6.49M</td>
+        </tr>
+        <tr>
+          <td><strong>RLP/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">96</td>
+          <td class="num">59</td>
+          <td class="num warn">59</td>
+          <td class="num warn">$6.45M</td>
+        </tr>
+        <tr>
+          <td><strong>WBTC/USDT</strong> <span class="chip">ethereum</span></td>
+          <td class="num">311</td>
+          <td class="num">200</td>
+          <td class="num warn">9</td>
+          <td class="num warn">$6.22M</td>
+        </tr>
+        <tr>
+          <td><strong>msY/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">21</td>
+          <td class="num">20</td>
+          <td class="num warn">4</td>
+          <td class="num warn">$4.64M</td>
+        </tr>
+        <tr>
+          <td><strong>PST/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">8</td>
+          <td class="num">7</td>
+          <td class="num warn">3</td>
+          <td class="num warn">$4.32M</td>
+        </tr>
+        <tr>
+          <td><em>+ 129 more directional markets</em></td>
+          <td class="num">19,738</td>
+          <td class="num">8,070</td>
+          <td class="num warn">348</td>
+          <td class="num warn">$18.47M</td>
         </tr>
   </table>
 
-  <h2>Most critical positions</h2>
+  <h2>Most critical positions — directional markets</h2>
   <table>
     <tr><th class="num">Health</th><th class="num">To threshold</th><th class="num">Debt</th>
         <th>Market</th><th>Chain</th><th>Borrower</th></tr>
     
         <tr>
-          <td class="num crit">1.0216</td>
-          <td class="num">+2.2%</td>
-          <td class="num">$550</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x085F06B314c71849288b9636eA73fe570d5Dde2F"
-              target="_blank" rel="noopener">0x085F…de2F</a></td>
+          <td class="num crit">0.0000</td>
+          <td class="num">+-100.0%</td>
+          <td class="num">$700,100</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x14bCD9da052Cdc6fE0b9446d5a616D5b7B4d4550"
+              target="_blank" rel="noopener">0x14bC…4550</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0275</td>
-          <td class="num">+2.8%</td>
-          <td class="num">$249</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xAd47E2e151597777bd2BCDc8CDd9008DcAa49348"
-              target="_blank" rel="noopener">0xAd47…9348</a></td>
+          <td class="num crit">0.0434</td>
+          <td class="num">+-95.7%</td>
+          <td class="num">$515,212</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0xBb13d96f722a2328420663eA845E0ef1eb3295A0"
+              target="_blank" rel="noopener">0xBb13…95A0</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0312</td>
-          <td class="num">+3.1%</td>
-          <td class="num">$4,847</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xAEB2C8A75A5310464C99fE982CE80Bc71F7dbe97"
-              target="_blank" rel="noopener">0xAEB2…be97</a></td>
+          <td class="num crit">0.2943</td>
+          <td class="num">+-70.6%</td>
+          <td class="num">$634,082</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0xE08D97e151473A848C3d9CA3f323Cb720472D015"
+              target="_blank" rel="noopener">0xE08D…D015</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0314</td>
-          <td class="num">+3.1%</td>
-          <td class="num">$1,532</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x729d339F8B5C0a26dcfD44921872a7267442309b"
-              target="_blank" rel="noopener">0x729d…309b</a></td>
+          <td class="num crit">0.2943</td>
+          <td class="num">+-70.6%</td>
+          <td class="num">$79,942</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x50f02612EA1F79a84ef72d6912A5452F40a88eDd"
+              target="_blank" rel="noopener">0x50f0…8eDd</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0317</td>
-          <td class="num">+3.2%</td>
-          <td class="num">$455</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xf24AB2bF64d537aE3D1D4dD600087648B2B3A0D4"
-              target="_blank" rel="noopener">0xf24A…A0D4</a></td>
+          <td class="num crit">0.2943</td>
+          <td class="num">+-70.6%</td>
+          <td class="num">$1,781</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0xf1D2D880C5DDe7cc912636C2b4D080b3FE5f7B50"
+              target="_blank" rel="noopener">0xf1D2…7B50</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0320</td>
-          <td class="num">+3.2%</td>
-          <td class="num">$8,623</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xA913d4B6ecCd71550B3F2A40409634F16bB9863B"
-              target="_blank" rel="noopener">0xA913…863B</a></td>
+          <td class="num crit">0.2944</td>
+          <td class="num">+-70.6%</td>
+          <td class="num">$179,219</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0xDC5F62652ebcBC1C2049FBd891fe6427Ae498F98"
+              target="_blank" rel="noopener">0xDC5F…8F98</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0321</td>
-          <td class="num">+3.2%</td>
-          <td class="num">$76,048</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x225750C10eDb3c3EeEb37d5473f6b6C0EFf2CA0a"
-              target="_blank" rel="noopener">0x2257…CA0a</a></td>
+          <td class="num crit">0.2944</td>
+          <td class="num">+-70.6%</td>
+          <td class="num">$29,737</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x1a3E2694846838B21aEaE85449d0D0D222FAC70c"
+              target="_blank" rel="noopener">0x1a3E…C70c</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0323</td>
-          <td class="num">+3.2%</td>
-          <td class="num">$26,843</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xdE33022363ff833194f63B846E744b501B2dbE2B"
-              target="_blank" rel="noopener">0xdE33…bE2B</a></td>
+          <td class="num crit">0.2945</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$19,576</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x108C37f3f51e8306fC3266CA699e30474d736B0d"
+              target="_blank" rel="noopener">0x108C…6B0d</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0326</td>
-          <td class="num">+3.3%</td>
-          <td class="num">$11,755</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x12Fb4E04A1b4Ad8Bd5a655C48598f4F41a6B3dCb"
-              target="_blank" rel="noopener">0x12Fb…3dCb</a></td>
+          <td class="num crit">0.2947</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$522,045</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x339c0db4A0030c88b4A48aafE56CdBa23c8d4338"
+              target="_blank" rel="noopener">0x339c…4338</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0328</td>
-          <td class="num">+3.3%</td>
-          <td class="num">$6,147</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x6D1c013E3311721B7509E31C29E243d7745F0553"
-              target="_blank" rel="noopener">0x6D1c…0553</a></td>
+          <td class="num crit">0.2947</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$29,737</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x72362ded2B5E5D1E96d495425744B75cb739D4a1"
+              target="_blank" rel="noopener">0x7236…D4a1</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0328</td>
-          <td class="num">+3.3%</td>
-          <td class="num">$123</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x4F048cEbB6114D1d824d3c697B23BB744319724D"
-              target="_blank" rel="noopener">0x4F04…724D</a></td>
+          <td class="num crit">0.2950</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$143,407</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x00000F91109c4d0007e90000D9facAD5298A0CAc"
+              target="_blank" rel="noopener">0x0000…0CAc</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0330</td>
-          <td class="num">+3.3%</td>
-          <td class="num">$2.59M</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x35D4915425d78508Ba038Cf1C853b856D8b2cf75"
-              target="_blank" rel="noopener">0x35D4…cf75</a></td>
+          <td class="num crit">0.2951</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$276,966</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x80BF7Db69556D9521c03461978B8fC731DBBD4e4"
+              target="_blank" rel="noopener">0x80BF…D4e4</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0332</td>
-          <td class="num">+3.3%</td>
-          <td class="num">$8,868</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xF24a17b04956e0591C2d75fFB4BBe3DF23D10cf6"
-              target="_blank" rel="noopener">0xF24a…0cf6</a></td>
+          <td class="num crit">0.2953</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$119,866</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x2D48FEA49EC8073cEE3F3509f91Cb9b4aad41088"
+              target="_blank" rel="noopener">0x2D48…1088</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0335</td>
-          <td class="num">+3.4%</td>
-          <td class="num">$77,473</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0x7F5911b0b2c1915a0C52762508954265e60dE66c"
-              target="_blank" rel="noopener">0x7F59…E66c</a></td>
+          <td class="num crit">0.2954</td>
+          <td class="num">+-70.5%</td>
+          <td class="num">$1,780</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x8050a2155477F121Bd62199490602232bE0192fB"
+              target="_blank" rel="noopener">0x8050…92fB</a></td>
         </tr>
         <tr>
-          <td class="num crit">1.0336</td>
-          <td class="num">+3.4%</td>
-          <td class="num">$14,688</td>
-          <td>cbBTC/USDC</td>
-          <td><span class="chip">base</span></td>
-          <td class="mono"><a href="https://basescan.org/address/0xa73F2b70eA7842fA817A3127dD9C941c20DD989b"
-              target="_blank" rel="noopener">0xa73F…989b</a></td>
+          <td class="num crit">0.2960</td>
+          <td class="num">+-70.4%</td>
+          <td class="num">$37,390</td>
+          <td>RLP/USDC</td>
+          <td><span class="chip">ethereum</span></td>
+          <td class="mono"><a href="https://etherscan.io/address/0x0AC3D5090afE0503443E3753e8Ad7bc0ee0dAaf2"
+              target="_blank" rel="noopener">0x0AC3…Aaf2</a></td>
         </tr>
   </table>
 
-  <h2>Health distribution of at-risk positions</h2>
+  <h2>Health distribution of at-risk positions (directional)</h2>
   
         <div class="band">
           <div class="band-label">1.00–1.03</div>
           <div class="band-track">
-            <div class="band-fill" style="width:0%"></div>
+            <div class="band-fill" style="width:2%"></div>
           </div>
-          <div class="band-meta">2 positions · $799</div>
+          <div class="band-meta">15 positions · $6.99M</div>
         </div>
         <div class="band">
           <div class="band-label">1.03–1.06</div>
           <div class="band-track">
-            <div class="band-fill" style="width:33%"></div>
+            <div class="band-fill" style="width:21%"></div>
           </div>
-          <div class="band-meta">250 positions · $18.88M</div>
+          <div class="band-meta">188 positions · $42.15M</div>
         </div>
         <div class="band">
           <div class="band-label">1.06–1.10</div>
           <div class="band-track">
             <div class="band-fill" style="width:100%"></div>
           </div>
-          <div class="band-meta">764 positions · $50.14M</div>
+          <div class="band-meta">885 positions · $102.91M</div>
         </div>
 
+  <h2>Correlated pairs (peg-checked) — intentional high leverage, low liquidation risk</h2>
+  <p style="color:var(--dim);font-size:14px;margin-bottom:10px">
+    Collateral and debt move together (stable/stable, LST/underlying) and every
+    stable side trades at or above ~97% of its native peg (yield-bearing wrappers
+    above par are normal). Positions are commonly run near the threshold by design.
+    $562.92M across 749 positions sits
+    inside the buffer — shown for transparency, excluded from the headline.</p>
+  <table>
+    <tr><th>Market</th><th class="num">Verified</th><th class="num">In buffer</th>
+        <th class="num">Debt in buffer</th></tr>
+    
+        <tr>
+          <td><strong>sUSDe/USDtb</strong> <span class="chip">ethereum</span></td>
+          <td class="num">72</td>
+          <td class="num">59</td>
+          <td class="num">$99.18M</td>
+        </tr>
+        <tr>
+          <td><strong>syrupUSDC/PYUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="num">14</td>
+          <td class="num">11</td>
+          <td class="num">$57.21M</td>
+        </tr>
+        <tr>
+          <td><strong>wstETH/WETH</strong> <span class="chip">ethereum</span></td>
+          <td class="num">48</td>
+          <td class="num">38</td>
+          <td class="num">$53.01M</td>
+        </tr>
+        <tr>
+          <td><strong>sUSDS/USDT</strong> <span class="chip">ethereum</span></td>
+          <td class="num">33</td>
+          <td class="num">19</td>
+          <td class="num">$47.17M</td>
+        </tr>
+        <tr>
+          <td><strong>syrupUSDC/RLUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="num">27</td>
+          <td class="num">22</td>
+          <td class="num">$34.93M</td>
+        </tr>
+        <tr>
+          <td><em>+ 81 more correlated markets</em></td>
+          <td class="num">889</td>
+          <td class="num">600</td>
+          <td class="num">$271.42M</td>
+        </tr>
+  </table>
+
+  <h2>Anomalous / depegged — a "stable" side is off its peg</h2>
+  <p style="color:var(--dim);font-size:14px;margin-bottom:10px">
+    These pairs would be classified as correlated, but a stable side trades below
+    ~97% of its native peg (or has no price) — they are NOT safe-leverage markets
+    right now, and their USD figures are valued at the depegged price (treat with
+    caution).
+    $10.61M across 196 positions in the buffer.</p>
+  <table>
+    <tr><th>Market</th><th>Depegged asset</th><th class="num">Verified</th>
+        <th class="num">In buffer</th><th class="num">Debt in buffer</th></tr>
+    
+        <tr>
+          <td><strong>USR/USDC</strong> <span class="chip">base</span></td>
+          <td class="crit">USR $0.124</td>
+          <td class="num">33</td>
+          <td class="num">33</td>
+          <td class="num">$2.38M</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apyUSD-18JUN2026/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-apyUSD-18JUN2026 $0.911</td>
+          <td class="num">169</td>
+          <td class="num">34</td>
+          <td class="num">$2.00M</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apyUSD-18JUN2026/apxUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-apyUSD-18JUN2026 $0.911, apxUSD $0.957</td>
+          <td class="num">44</td>
+          <td class="num">18</td>
+          <td class="num">$1.47M</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apxUSD-18JUN2026/USDC</strong> <span class="chip">base</span></td>
+          <td class="crit">PT-apxUSD-18JUN2026 (no price)</td>
+          <td class="num">41</td>
+          <td class="num">26</td>
+          <td class="num">$1.17M</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apxUSD-18JUN2026/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-apxUSD-18JUN2026 $0.954</td>
+          <td class="num">41</td>
+          <td class="num">5</td>
+          <td class="num">$936,434</td>
+        </tr>
+        <tr>
+          <td><strong>apyUSD/apxUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">apxUSD $0.957</td>
+          <td class="num">18</td>
+          <td class="num">13</td>
+          <td class="num">$671,976</td>
+        </tr>
+        <tr>
+          <td><strong>sUSDat/AUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">sUSDat $0.967</td>
+          <td class="num">39</td>
+          <td class="num">6</td>
+          <td class="num">$581,303</td>
+        </tr>
+        <tr>
+          <td><strong>USR/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">USR $0.124</td>
+          <td class="num">38</td>
+          <td class="num">38</td>
+          <td class="num">$567,037</td>
+        </tr>
+        <tr>
+          <td><strong>ROY-ST-apyUSD/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">ROY-ST-apyUSD (no price)</td>
+          <td class="num">3</td>
+          <td class="num">3</td>
+          <td class="num">$245,485</td>
+        </tr>
+        <tr>
+          <td><strong>ROY-ST-apyUSD/apxUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">ROY-ST-apyUSD (no price), apxUSD $0.957</td>
+          <td class="num">4</td>
+          <td class="num">4</td>
+          <td class="num">$239,482</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apxUSD-5NOV2026/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-apxUSD-5NOV2026 $0.901</td>
+          <td class="num">5</td>
+          <td class="num">1</td>
+          <td class="num">$220,771</td>
+        </tr>
+        <tr>
+          <td><strong>deUSD/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">deUSD (no price)</td>
+          <td class="num">9</td>
+          <td class="num">9</td>
+          <td class="num">$70,539</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apxUSD-18JUN2026/apxUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-apxUSD-18JUN2026 $0.954, apxUSD $0.957</td>
+          <td class="num">8</td>
+          <td class="num">3</td>
+          <td class="num">$41,264</td>
+        </tr>
+        <tr>
+          <td><strong>PT-apyUSD-5NOV2026/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-apyUSD-5NOV2026 $0.861</td>
+          <td class="num">4</td>
+          <td class="num">1</td>
+          <td class="num">$14,498</td>
+        </tr>
+        <tr>
+          <td><strong>PT-slvlUSD-25SEP2025/lvlUSD</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">PT-slvlUSD-25SEP2025 (no price)</td>
+          <td class="num">2</td>
+          <td class="num">2</td>
+          <td class="num">$5,267</td>
+        </tr>
+        <tr>
+          <td><strong>BONDUSD/USR</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">BONDUSD (no price), USR $0.124</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">$0</td>
+        </tr>
+        <tr>
+          <td><strong>USDT/USDT</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">USDT (no price)</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">$0</td>
+        </tr>
+        <tr>
+          <td><strong>USDT/USDT</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">USDT (no price)</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">$0</td>
+        </tr>
+        <tr>
+          <td><strong>mM1-USD/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">mM1-USD (no price)</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">$0</td>
+        </tr>
+        <tr>
+          <td><strong>bdUSD/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="crit">bdUSD (no price)</td>
+          <td class="num">2</td>
+          <td class="num">0</td>
+          <td class="num">$0</td>
+        </tr>
+  </table>
+
   <footer>
-    <strong>Method.</strong> Borrowers enumerated via the official Morpho API; every
+    <p style="margin-bottom:12px"><a href="https://github.com/alrimarleskovar/forewarn" target="_blank" rel="noopener">Code →</a></p><strong>Method.</strong> Borrowers enumerated via the official Morpho API; every
     position then verified on-chain at a pinned block per chain (Multicall3 batched
     <span class="mono">position()</span> reads). Health = collateral × oracle price ×
     LLTV ÷ debt, using each market's own oracle (<span class="mono">price()</span>,
     1e36 scale) — the same engine validated on the Feb 2026 liquidation backtest.
     <ul>
-      <li>Single snapshot — not a continuously updating feed yet.</li>
-      <li>Coverage: 2 markets (Base cbBTC/USDC, Ethereum wstETH/USDC).</li>
+      <li>Single snapshot — not a continuously updating feed yet.
+          Refreshed Jun 10, 2026 18:33 UTC · 245 markets monitored.</li>
+      <li>Coverage: all non-idle Morpho markets on Ethereum + Base with borrow ≥ $50k;
+          reverting oracles skipped (counts in snapshot metadata).</li>
       <li>Positions with debt &lt; $1,000 excluded from ranking unless API health ≤ 1.3
           (cutoffs logged in the snapshot metadata).</li>
-      <li>USDC valued at $1.00.</li>
+      <li>Health is fully on-chain; USD figures use loan-asset prices from the
+          Morpho API (ranking only).</li>
+      <li>Correlated vs directional is a symbol-based heuristic (stable-stable and
+          same-family LST/underlying = correlated) — an approximation. Stables are
+          peg-checked against their native peg (EUR stables vs ECB EUR/USD), flagged
+          only below ~97% of it — above-par yield wrappers are normal. PT-style
+          tokens trading at maturity discount can land in "anomalous" by design.</li>
       <li>Informational only — not financial advice, no execution, no custody.</li>
     </ul>
   </footer>

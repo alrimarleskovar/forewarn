@@ -75,13 +75,25 @@ query ($first: Int!, $skip: Int!, $chain: Int!, $mkt: String!, $orderBy: MarketP
 """
 
 
-def gql(query: str, variables: dict) -> dict:
-    resp = requests.post(MORPHO_API, json={"query": query, "variables": variables}, timeout=60)
-    resp.raise_for_status()
-    payload = resp.json()
-    if "errors" in payload:
-        raise RuntimeError(f"Morpho API: {payload['errors']}")
-    return payload["data"]
+def gql(query: str, variables: dict, retries: int = 6) -> dict:
+    last = None
+    for attempt in range(retries):
+        try:
+            resp = requests.post(
+                MORPHO_API, json={"query": query, "variables": variables}, timeout=60
+            )
+            if resp.status_code in (429, 502, 503, 504):
+                raise requests.exceptions.RetryError(f"HTTP {resp.status_code}")
+            resp.raise_for_status()
+            payload = resp.json()
+            if "errors" in payload:
+                raise RuntimeError(f"Morpho API: {payload['errors']}")
+            return payload["data"]
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout,
+                requests.exceptions.RetryError) as exc:
+            last = exc
+            time.sleep(min(5 * 2**attempt, 120))  # backoff: 5s → 120s
+    raise RuntimeError(f"Morpho API indisponível após {retries} tentativas: {last}")
 
 
 def enumerate_borrowers(mkt: dict) -> tuple[dict[str, dict], dict]:
