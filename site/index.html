@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morpho Liquidation Early-Warning — Live Risk Snapshot</title>
+<style>
+  :root {
+    --bg: #0c0f14; --panel: #141923; --line: #232b3a;
+    --text: #e8edf4; --dim: #8b97a8; --accent: #ffb454; --crit: #ff6b6b;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 16px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 48px 20px 64px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .kicker {
+    color: var(--accent); font-size: 13px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px;
+  }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; letter-spacing: -.01em; }
+  h1 .hl { color: var(--accent); }
+  .sub { color: var(--dim); margin-top: 10px; font-size: 14px; }
+  h2 { font-size: 15px; letter-spacing: .08em; text-transform: uppercase;
+       color: var(--dim); margin: 44px 0 14px; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel);
+          border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { padding: 10px 14px; text-align: left; font-size: 14px; }
+  th { color: var(--dim); font-weight: 600; font-size: 12px;
+       text-transform: uppercase; letter-spacing: .06em;
+       border-bottom: 1px solid var(--line); }
+  tr + tr td { border-top: 1px solid var(--line); }
+  .num { font-variant-numeric: tabular-nums; text-align: right; }
+  th.num { text-align: right; }
+  .warn { color: var(--accent); font-weight: 600; }
+  .crit { color: var(--crit); font-weight: 700; }
+  .chip { display: inline-block; padding: 1px 8px; border-radius: 999px;
+          font-size: 11px; font-weight: 600; background: #1d2535; color: var(--dim);
+          text-transform: uppercase; letter-spacing: .05em; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; }
+  a { color: #7fb4ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .band { display: grid; grid-template-columns: 90px 1fr 220px; gap: 14px;
+          align-items: center; padding: 10px 14px; background: var(--panel);
+          border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; }
+  .band-label { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 14px; }
+  .band-track { background: #1d2535; border-radius: 6px; height: 14px; }
+  .band-fill { background: linear-gradient(90deg, var(--accent), var(--crit));
+               height: 100%; border-radius: 6px; min-width: 2px; }
+  .band-meta { color: var(--dim); font-size: 13px; text-align: right;
+               font-variant-numeric: tabular-nums; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line);
+           color: var(--dim); font-size: 13px; }
+  footer ul { margin: 8px 0 0 18px; }
+  footer li { margin-bottom: 4px; }
+  @media (max-width: 640px) {
+    .band { grid-template-columns: 80px 1fr; }
+    .band-meta { grid-column: 1 / -1; text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Morpho Blue · Liquidation Early-Warning · Live Snapshot v0</div>
+  <h1><span class="hl">$69.02M</span> of debt is inside the 10% warning
+      buffer across <span class="hl">1,016</span> positions</h1>
+  <div class="sub">Snapshot Jun 10, 2026 11:51 UTC · base block 47,151,461 · ethereum block 25,286,862 · health read on-chain from each
+      market's own oracle · warning rule: health &lt; 1.10</div>
+
+  <h2>Markets monitored</h2>
+  <table>
+    <tr><th>Market</th><th class="num">Active</th><th class="num">Verified on-chain</th>
+        <th class="num">At risk</th><th class="num">Debt at risk</th></tr>
+    
+        <tr>
+          <td><strong>cbBTC/USDC</strong> <span class="chip">base</span></td>
+          <td class="num">29,765</td>
+          <td class="num">17,364</td>
+          <td class="num warn">1,014</td>
+          <td class="num warn">$68.99M</td>
+        </tr>
+        <tr>
+          <td><strong>wstETH/USDC</strong> <span class="chip">ethereum</span></td>
+          <td class="num">368</td>
+          <td class="num">205</td>
+          <td class="num warn">2</td>
+          <td class="num warn">$33,035</td>
+        </tr>
+  </table>
+
+  <h2>Most critical positions</h2>
+  <table>
+    <tr><th class="num">Health</th><th class="num">To threshold</th><th class="num">Debt</th>
+        <th>Market</th><th>Chain</th><th>Borrower</th></tr>
+    
+        <tr>
+          <td class="num crit">1.0216</td>
+          <td class="num">+2.2%</td>
+          <td class="num">$550</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x085F06B314c71849288b9636eA73fe570d5Dde2F"
+              target="_blank" rel="noopener">0x085F…de2F</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0275</td>
+          <td class="num">+2.8%</td>
+          <td class="num">$249</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xAd47E2e151597777bd2BCDc8CDd9008DcAa49348"
+              target="_blank" rel="noopener">0xAd47…9348</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0312</td>
+          <td class="num">+3.1%</td>
+          <td class="num">$4,847</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xAEB2C8A75A5310464C99fE982CE80Bc71F7dbe97"
+              target="_blank" rel="noopener">0xAEB2…be97</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0314</td>
+          <td class="num">+3.1%</td>
+          <td class="num">$1,532</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x729d339F8B5C0a26dcfD44921872a7267442309b"
+              target="_blank" rel="noopener">0x729d…309b</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0317</td>
+          <td class="num">+3.2%</td>
+          <td class="num">$455</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xf24AB2bF64d537aE3D1D4dD600087648B2B3A0D4"
+              target="_blank" rel="noopener">0xf24A…A0D4</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0320</td>
+          <td class="num">+3.2%</td>
+          <td class="num">$8,623</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xA913d4B6ecCd71550B3F2A40409634F16bB9863B"
+              target="_blank" rel="noopener">0xA913…863B</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0321</td>
+          <td class="num">+3.2%</td>
+          <td class="num">$76,048</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x225750C10eDb3c3EeEb37d5473f6b6C0EFf2CA0a"
+              target="_blank" rel="noopener">0x2257…CA0a</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0323</td>
+          <td class="num">+3.2%</td>
+          <td class="num">$26,843</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xdE33022363ff833194f63B846E744b501B2dbE2B"
+              target="_blank" rel="noopener">0xdE33…bE2B</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0326</td>
+          <td class="num">+3.3%</td>
+          <td class="num">$11,755</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x12Fb4E04A1b4Ad8Bd5a655C48598f4F41a6B3dCb"
+              target="_blank" rel="noopener">0x12Fb…3dCb</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0328</td>
+          <td class="num">+3.3%</td>
+          <td class="num">$6,147</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x6D1c013E3311721B7509E31C29E243d7745F0553"
+              target="_blank" rel="noopener">0x6D1c…0553</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0328</td>
+          <td class="num">+3.3%</td>
+          <td class="num">$123</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x4F048cEbB6114D1d824d3c697B23BB744319724D"
+              target="_blank" rel="noopener">0x4F04…724D</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0330</td>
+          <td class="num">+3.3%</td>
+          <td class="num">$2.59M</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x35D4915425d78508Ba038Cf1C853b856D8b2cf75"
+              target="_blank" rel="noopener">0x35D4…cf75</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0332</td>
+          <td class="num">+3.3%</td>
+          <td class="num">$8,868</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xF24a17b04956e0591C2d75fFB4BBe3DF23D10cf6"
+              target="_blank" rel="noopener">0xF24a…0cf6</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0335</td>
+          <td class="num">+3.4%</td>
+          <td class="num">$77,473</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0x7F5911b0b2c1915a0C52762508954265e60dE66c"
+              target="_blank" rel="noopener">0x7F59…E66c</a></td>
+        </tr>
+        <tr>
+          <td class="num crit">1.0336</td>
+          <td class="num">+3.4%</td>
+          <td class="num">$14,688</td>
+          <td>cbBTC/USDC</td>
+          <td><span class="chip">base</span></td>
+          <td class="mono"><a href="https://basescan.org/address/0xa73F2b70eA7842fA817A3127dD9C941c20DD989b"
+              target="_blank" rel="noopener">0xa73F…989b</a></td>
+        </tr>
+  </table>
+
+  <h2>Health distribution of at-risk positions</h2>
+  
+        <div class="band">
+          <div class="band-label">1.00–1.03</div>
+          <div class="band-track">
+            <div class="band-fill" style="width:0%"></div>
+          </div>
+          <div class="band-meta">2 positions · $799</div>
+        </div>
+        <div class="band">
+          <div class="band-label">1.03–1.06</div>
+          <div class="band-track">
+            <div class="band-fill" style="width:33%"></div>
+          </div>
+          <div class="band-meta">250 positions · $18.88M</div>
+        </div>
+        <div class="band">
+          <div class="band-label">1.06–1.10</div>
+          <div class="band-track">
+            <div class="band-fill" style="width:100%"></div>
+          </div>
+          <div class="band-meta">764 positions · $50.14M</div>
+        </div>
+
+  <footer>
+    <strong>Method.</strong> Borrowers enumerated via the official Morpho API; every
+    position then verified on-chain at a pinned block per chain (Multicall3 batched
+    <span class="mono">position()</span> reads). Health = collateral × oracle price ×
+    LLTV ÷ debt, using each market's own oracle (<span class="mono">price()</span>,
+    1e36 scale) — the same engine validated on the Feb 2026 liquidation backtest.
+    <ul>
+      <li>Single snapshot — not a continuously updating feed yet.</li>
+      <li>Coverage: 2 markets (Base cbBTC/USDC, Ethereum wstETH/USDC).</li>
+      <li>Positions with debt &lt; $1,000 excluded from ranking unless API health ≤ 1.3
+          (cutoffs logged in the snapshot metadata).</li>
+      <li>USDC valued at $1.00.</li>
+      <li>Informational only — not financial advice, no execution, no custody.</li>
+    </ul>
+  </footer>
+</div>
+</body>
+</html>
