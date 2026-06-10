@@ -1,0 +1,14 @@
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+.env
+.env.local
+results/
+*.db
+.DS_Store
+dist/
+build/
+.coverage
+htmlcov/
+.ruff_cache/

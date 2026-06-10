@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quant:
+    name: quant (ruff + pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: quant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Sync (locked)
+        run: uv sync --locked
+      - name: Lint (ruff)
+        run: uv run ruff check .
+      - name: Test (pytest)
+        # exit code 5 = nenhum teste coletado; aceitável na fase de scaffold
+        run: |
+          set +e
+          uv run pytest
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ] && [ "$code" -ne 5 ]; then exit "$code"; fi
+
+  ingestion:
+    name: ingestion (lint + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/ingestion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run lint
+      - run: npm test
+
+  preregistration-gate:
+    name: preregistration-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bloquear queries antes do pré-registro (§ 4 preenchido)
+        run: |
+          set -euo pipefail
+          PREREG="docs/validation-preregistration.md"
+
+          # Recorta APENAS a seção "## 4." (limiares) — campos de nome/data/
+          # assinatura fora dela podem estar em branco sem bloquear.
+          section4="$(awk '/^## 4\./{flag=1; next} /^## /{flag=0} flag' "$PREREG")"
+
+          thresholds_blank=false
+          if grep -qF '[___]' <<<"$section4"; then
+            thresholds_blank=true
+          fi
+
+          queries_present=false
+          if find dune/queries -name '*.sql' -size +0c | grep -q .; then
+            queries_present=true
+          fi
+
+          if $thresholds_blank && $queries_present; then
+            echo "::error::Pré-registro violado: docs/validation-preregistration.md § 4 ainda contém [___], mas existe dune/queries/*.sql com conteúdo."
+            echo "Preencha e commite os limiares ANTES de qualquer query (ver CONTRIBUTING.md)."
+            exit 1
+          fi
+
+          echo "OK — thresholds_blank=$thresholds_blank, queries_present=$queries_present"

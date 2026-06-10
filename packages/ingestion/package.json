@@ -1,0 +1,17 @@
+{
+  "name": "@morpho-risk-tooling/ingestion",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Ingestão de dados (Dune/subgraph/GraphQL) para o Morpho Risk Tooling. Esqueleto — sem lógica nesta fase.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "test": "echo \"(placeholder) sem testes nesta fase — validação pré-build\" && exit 0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
