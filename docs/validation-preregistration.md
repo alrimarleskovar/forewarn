@@ -6,10 +6,10 @@
 
 ## 0. Atestado de pré-registro
 
-- **Autor(es):** `[NOME]`
-- **Data/hora do commit:** `[YYYY-MM-DD HH:MM TZ]`
+- **Autor(es):** `[ALRIMAR]`
+- **Data/hora do commit:** `[2026-06-10 01:50 TZ]`
 - **Commit hash:** `[preenchido pelo git]`
-- **Atesto que nenhum dado de liquidação de fev/2026 ou out/2025 foi inspecionado antes deste commit:** `[ ] SIM`
+- **Atesto que nenhum dado de liquidação de fev/2026 ou out/2025 foi inspecionado antes deste commit:** `[x] SIM`
 
 ---
 
@@ -18,8 +18,8 @@
 > Um modelo de risco neutro voltado ao tomador/integrador entrega aviso de liquidação útil e acionável com mais antecedência (ou melhor conversão em ação) do que as soluções atuais.
 
 - **Predição direcional (preencher antes dos dados — compara-se esperado vs. observado nos 3 eixos):**
-  - **Sinal esperado:** teto endereçável ~`[___]%`, janela realizada mediana ~`[___]`.
-  - **Espaço esperado:** `[ ABERTO / CONTESTADO / FECHADO ]` — racional: `[___]`.
+  - **Sinal esperado:** teto endereçável ~`[50]%`, janela realizada mediana ~`[1-2h]`.
+  - **Espaço esperado:** `[ CONTESTADO  ]` — racional: `[ incumbente oficial (Hypernative) existe, mas há brecha no neutro/borrower-facing]`.
   - **Rampa esperada:** `[ TEM / FINA / SEM ]` — contatos warm/2º grau atualmente conhecidos: `[___]`.
 
   *(Registrar a expectativa nos 3 eixos força honestidade na leitura depois — não só no Sinal.)*
@@ -58,64 +58,28 @@
 ### 4.1 Sinal (Teste 1)
 | Classe | Critério (default a confirmar) | Confirmado? |
 |---|---|---|
-| **FORTE** | janela realizada mediana **≥ 2h** `E/OU` teto endereçável **≥ 40%**, **estável nos dois regimes** | `[ ]` valor final: `[___]` |
-| **MÉDIO** | janela **1–2h** `OU` sinal instável entre regimes / atribuição mista | `[ ]` valor final janela: `[___]` |
-| **FRACO** | janela **< 1h** `E` teto endereçável **< `[___]%`** | `[ ]` valor final janela: `[___]` / teto: `[___]` |
+| **FORTE** | janela realizada mediana **≥ 2h** `E/OU` teto endereçável **≥ 40%**, **estável nos dois regimes** | `[x]` valor final: `[___]` |
+| **MÉDIO** | janela **1–2h** `OU` sinal instável entre regimes / atribuição mista | `[x]` valor final janela: `[___]` |
+| **FRACO** | janela **< 1h** `E` teto endereçável **< `[25]%`** | `[x]` valor final janela: `[___]` / teto: `[___]` |
 
 **Definição de "estável entre regimes":** a classe não muda entre fev/2026 e out/2025; divergência rebaixa para MÉDIO no máximo. `[ ]` confirmado
 
 ### 4.2 Espaço (Teste 2)
 | Classe | Critério (default a confirmar) | Confirmado? |
 |---|---|---|
-| **ABERTO** | ≥1 sinal explícito (Morpho ou integrador) de que terceiro neutro tem lugar | `[ ]` |
-| **CONTESTADO** | Hypernative provavelmente estende `OU` integrador sinaliza preferência por build in-house | `[ ]` |
-| **FECHADO** | parceiro oficial cobrirá `E` integradores construindo internamente | `[ ]` |
+| **ABERTO** | ≥1 sinal explícito (Morpho ou integrador) de que terceiro neutro tem lugar | `[x ]` |
+| **CONTESTADO** | Hypernative provavelmente estende `OU` integrador sinaliza preferência por build in-house | `[x ]` |
+| **FECHADO** | parceiro oficial cobrirá `E` integradores construindo internamente | `[x ]` |
 
 ### 4.3 Rampa (Teste 3)
 | Classe | Critério (default a confirmar) | Confirmado? |
 |---|---|---|
-| **TEM** | **≥ 3** contatos warm/2º grau nas funções certas | `[ ]` valor final: `[___]` |
-| **FINA** | 1–2 | `[ ]` |
-| **SEM** | 0–1 | `[ ]` |
+| **TEM** | **≥ 3** contatos warm/2º grau nas funções certas | `[x]` valor final: `[]` |
+| **FINA** | 1–2 | `[x ]` |
+| **SEM** | 0–1 | `[x ]` |
 
 ---
 
-## 5. Regra de decisão (congelada)
 
-| Espaço | Veredito (Sinal FORTE/MÉDIO) | Papel da Rampa |
-|---|---|---|
-| ABERTO | **GO pleno** | TEM/FINA → outbound+inbound · SEM → inbound-led |
-| CONTESTADO | **GO acelerado c/ cláusula de obsolescência** (+ plano de defensibilidade) | TEM/FINA → outbound-led · SEM → inbound-led |
-| FECHADO | **NO-GO no formato atual** | — |
+ALRIMAR SOBRINHO 10-06-2026
 
-**Sinal FRACO (qualquer Espaço/Rampa):** **Pivô** — avaliar produto de ação automática (mais regulado) ou Wedge A. Não buildar o aviso.
-
-- **Acordo da equipe de seguir esta regra mesmo se o resultado for inconveniente:** `[ ] SIM`
-
----
-
-## 6. Cláusula de alteração de limiar
-
-Qualquer ajuste de limiar **após** ver dados exige, neste arquivo:
-- **Data do ajuste:** `[___]`
-- **Limiar antigo → novo:** `[___]`
-- **Motivo explícito (não "o resultado ficaria melhor"):** `[___]`
-- **Reset de expectativa registrado:** `[ ]`
-- **Aprovado por:** `[___]`
-
-> Log de alterações (append-only):
-> - `[nenhuma até o momento]`
-
----
-
-## 7. Pendências que dependem de dados externos (não bloqueiam o veredito on-chain)
-
-- [ ] Dado de alert-delivery do integrador → refina teto endereçável removendo "viu e declinou".
-- [ ] Confirmar granularidade do preço de oráculo histórico na fonte escolhida.
-
----
-
-## 8. Assinaturas
-
-- `[NOME]` — `[DATA]`
-- `[NOME]` — `[DATA]`
