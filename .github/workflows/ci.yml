@@ -14,7 +14,7 @@ jobs:
       run:
         working-directory: quant
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
@@ -38,7 +38,7 @@ jobs:
       run:
         working-directory: packages/ingestion
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -50,7 +50,7 @@ jobs:
     name: preregistration-gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Block queries before pre-registration (§ 4 filled)
         run: |
           set -euo pipefail
