@@ -12,6 +12,6 @@
     "test": "echo \"(placeholder) no tests at this stage — pre-build validation\" && exit 0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "typescript": "^7.0.2"
   }
 }
